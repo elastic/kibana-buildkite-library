@@ -11,5 +11,5 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./buildkite"), exports);
-__exportStar(require("./ci-stats"), exports);
+exports.CiStats = require("./ci-stats");
 //# sourceMappingURL=index.js.map

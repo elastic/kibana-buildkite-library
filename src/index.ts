@@ -1,2 +1,2 @@
 export * from './buildkite';
-export * from './ci-stats';
+export * as CiStats from './ci-stats';
