@@ -26,7 +26,7 @@ export type Pipeline = {
   provider: {
     id: string;
     webhook_url: string;
-    settings: {};
+    settings: Record<string, string>;
   };
 
   steps: Step[];
