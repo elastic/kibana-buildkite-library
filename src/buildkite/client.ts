@@ -7,7 +7,7 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
-import { Build } from './types/build';
+import { Build, BuildStatus } from './types/build';
 import { Job, JobState } from './types/job';
 
 export type BuildkiteClientConfig = {
@@ -93,7 +93,7 @@ export class BuildkiteClient {
     };
   };
 
-  getBuildStatus = (build: Build) => {
+  getBuildStatus = (build: Build): BuildStatus => {
     let hasRetries = false;
     let success = true;
 

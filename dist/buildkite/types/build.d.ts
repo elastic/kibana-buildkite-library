@@ -1,6 +1,11 @@
 import { Job } from './job';
 import { Pipeline } from './pipeline';
 export declare type BuildState = 'running' | 'scheduled' | 'passed' | 'failed' | 'blocked' | 'canceled' | 'canceling' | 'skipped' | 'not_run' | 'finished';
+export declare type BuildStatus = {
+    state: BuildState;
+    success: boolean;
+    hasRetries: boolean;
+};
 export declare type Build = {
     id: string;
     url: string;

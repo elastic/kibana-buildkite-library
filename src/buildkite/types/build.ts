@@ -13,6 +13,12 @@ export type BuildState =
   | 'not_run'
   | 'finished';
 
+export type BuildStatus = {
+  state: BuildState;
+  success: boolean;
+  hasRetries: boolean;
+};
+
 export type Build = {
   id: string;
   url: string;

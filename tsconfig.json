@@ -12,5 +12,5 @@
     "lib": ["es2020"],
     "declaration": true
   },
-  "exclude": ["**/*.test.ts", "**/vm-filesystem/**"]
+  "exclude": ["**/*.test.ts", "**/vm-filesystem/**", "**/dist"]
 }

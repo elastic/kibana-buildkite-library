@@ -1,5 +1,5 @@
 import { AxiosInstance } from 'axios';
-import { Build } from './types/build';
+import { Build, BuildStatus } from './types/build';
 import { Job, JobState } from './types/job';
 export declare type BuildkiteClientConfig = {
     baseUrl?: string;
@@ -14,14 +14,6 @@ export declare class BuildkiteClient {
         success: boolean;
         state: JobState;
     };
-    getBuildStatus: (build: Build) => {
-        state: import("./types/build").BuildState;
-        success: boolean;
-        hasRetries: boolean;
-    };
-    getCurrentBuildStatus: (includeRetriedJobs?: boolean) => Promise<{
-        state: import("./types/build").BuildState;
-        success: boolean;
-        hasRetries: boolean;
-    }>;
+    getBuildStatus: (build: Build) => BuildStatus;
+    getCurrentBuildStatus: (includeRetriedJobs?: boolean) => Promise<BuildStatus>;
 }
