@@ -64,6 +64,9 @@ class BuildkiteClient {
                 hasRetries,
             };
         };
+        this.getCurrentBuildStatus = async (includeRetriedJobs = false) => {
+            return this.getBuildStatus(await this.getCurrentBuild(includeRetriedJobs));
+        };
         const BUILDKITE_BASE_URL = (_b = (_a = config.baseUrl) !== null && _a !== void 0 ? _a : process.env.BUILDKITE_BASE_URL) !== null && _b !== void 0 ? _b : 'https://api.buildkite.com';
         const BUILDKITE_TOKEN = (_c = config.token) !== null && _c !== void 0 ? _c : process.env.BUILDKITE_TOKEN;
         // const BUILDKITE_AGENT_BASE_URL =

@@ -113,5 +113,7 @@ export class BuildkiteClient {
     };
   };
 
-  // get build status? check for flaky?
+  getCurrentBuildStatus = async (includeRetriedJobs = false) => {
+    return this.getBuildStatus(await this.getCurrentBuild(includeRetriedJobs));
+  };
 }

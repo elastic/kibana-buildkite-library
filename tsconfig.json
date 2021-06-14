@@ -9,7 +9,8 @@
     "removeComments": false,
     "resolveJsonModule": true,
     "sourceMap": true,
-    "lib": ["es2020"]
+    "lib": ["es2020"],
+    "declaration": true
   },
   "exclude": ["**/*.test.ts", "**/vm-filesystem/**"]
 }
