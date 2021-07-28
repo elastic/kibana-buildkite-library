@@ -1,15 +1,23 @@
-import { AxiosInstance } from 'axios';
 export declare type CiStatsClientConfig = {
-    baseUrl?: string;
+    hostname?: string;
     token?: string;
+    baseRetryMs?: number;
+    console?: {
+        log: (...args: any[]) => void;
+        error: (...args: any[]) => void;
+    };
 };
 export declare type CiStatsBuild = {
     id: string;
 };
 export declare class CiStatsClient {
-    http: AxiosInstance;
+    private readonly http;
+    private readonly baseUrl;
+    private readonly baseRetryMs;
+    private readonly console;
     constructor(config?: CiStatsClientConfig);
-    createBuild: () => Promise<CiStatsBuild>;
-    addGitInfo: (buildId: string) => Promise<import("axios").AxiosResponse<any>>;
-    completeBuild: (buildStatus: string, buildId?: string | undefined) => Promise<import("axios").AxiosResponse<any>>;
+    createBuild(): Promise<CiStatsBuild>;
+    addGitInfo(buildId: string): Promise<void>;
+    completeBuild(buildStatus: string, buildId?: string | undefined): Promise<void>;
+    private req;
 }
