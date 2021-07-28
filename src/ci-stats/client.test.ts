@@ -16,6 +16,10 @@ const mockConsole = {
   },
 };
 
+const startWith = (startsWith: string) => (v: string) => {
+  return typeof v === 'string' && v.startsWith(startsWith);
+};
+
 describe('CiStatsClient', () => {
   before(() => {
     nock.disableNetConnect();
@@ -23,6 +27,11 @@ describe('CiStatsClient', () => {
 
   afterEach(() => {
     mockConsole._msgs.length = 0;
+    const pending = nock(TEST_HOST).pendingMocks();
+    nock.cleanAll();
+    if (pending.length) {
+      throw new Error(`nock() contained unmatched mocks: ${format(pending)}`);
+    }
   });
 
   after(() => {
@@ -53,7 +62,6 @@ describe('CiStatsClient', () => {
       },
     });
 
-    expect(nock(TEST_HOST).pendingMocks()).to.eql([]);
     expect(mockConsole._msgs).to.have.length(1);
     expect(mockConsole._msgs[0]).to.satisfy((v: string) =>
       v.startsWith('ERROR: 500 response from https://ci-stats.test.host, retrying in 0.001 seconds'),
@@ -84,10 +92,48 @@ describe('CiStatsClient', () => {
       },
     });
 
-    expect(nock(TEST_HOST).pendingMocks()).to.eql([]);
     expect(mockConsole._msgs).to.have.length(1);
     expect(mockConsole._msgs[0]).to.satisfy((v: string) =>
       v.startsWith('ERROR: undefined response from https://ci-stats.test.host, retrying in 0.001 seconds'),
+    );
+  });
+
+  it('retries up to 5 times', async () => {
+    nock(TEST_URL).post('/v1/build').replyWithError('unable to connect to host');
+    nock(TEST_URL).post('/v1/build').replyWithError('unable to connect to host');
+    nock(TEST_URL).post('/v1/build').replyWithError('unable to connect to host');
+    nock(TEST_URL).post('/v1/build').replyWithError('unable to connect to host');
+    nock(TEST_URL).post('/v1/build').replyWithError('unable to connect to host');
+
+    const client = new CiStatsClient({
+      hostname: TEST_HOST,
+      token: 'foo',
+      baseRetryMs: 1,
+      console: mockConsole,
+    });
+
+    let error: Error | undefined;
+    try {
+      await client.createBuild();
+      throw new Error('expected client.createBuild() to throw');
+    } catch (_e) {
+      error = _e;
+    }
+
+    expect(error?.message).to.eql('unable to connect to host');
+
+    expect(mockConsole._msgs).to.have.length(4);
+    expect(mockConsole._msgs[0]).to.satisfy(
+      startWith('ERROR: undefined response from https://ci-stats.test.host, retrying in 0.001 seconds'),
+    );
+    expect(mockConsole._msgs[1]).to.satisfy(
+      startWith('ERROR: undefined response from https://ci-stats.test.host, retrying in 0.002 seconds'),
+    );
+    expect(mockConsole._msgs[2]).to.satisfy(
+      startWith('ERROR: undefined response from https://ci-stats.test.host, retrying in 0.003 seconds'),
+    );
+    expect(mockConsole._msgs[3]).to.satisfy(
+      startWith('ERROR: undefined response from https://ci-stats.test.host, retrying in 0.004 seconds'),
     );
   });
 });
