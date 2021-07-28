@@ -99,11 +99,11 @@ describe('CiStatsClient', () => {
   });
 
   it('retries up to 5 times', async () => {
-    nock(TEST_URL).post('/v1/build').replyWithError('unable to connect to host');
-    nock(TEST_URL).post('/v1/build').replyWithError('unable to connect to host');
-    nock(TEST_URL).post('/v1/build').replyWithError('unable to connect to host');
-    nock(TEST_URL).post('/v1/build').replyWithError('unable to connect to host');
-    nock(TEST_URL).post('/v1/build').replyWithError('unable to connect to host');
+    nock(TEST_URL).post('/v1/build').replyWithError('(1) unable to connect to host');
+    nock(TEST_URL).post('/v1/build').replyWithError('(2) unable to connect to host');
+    nock(TEST_URL).post('/v1/build').replyWithError('(3) unable to connect to host');
+    nock(TEST_URL).post('/v1/build').replyWithError('(4) unable to connect to host');
+    nock(TEST_URL).post('/v1/build').replyWithError('(5) unable to connect to host');
 
     const client = new CiStatsClient({
       hostname: TEST_HOST,
@@ -120,7 +120,7 @@ describe('CiStatsClient', () => {
       error = _e;
     }
 
-    expect(error?.message).to.eql('unable to connect to host');
+    expect(error?.message).to.eql('(5) unable to connect to host');
 
     expect(mockConsole._msgs).to.have.length(4);
     expect(mockConsole._msgs[0]).to.satisfy(
