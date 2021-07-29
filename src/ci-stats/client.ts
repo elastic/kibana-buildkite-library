@@ -81,7 +81,7 @@ export class CiStatsClient {
     let attempt = 0;
 
     // eslint-disable-next-line no-constant-condition
-    attemptRequest: while (true) {
+    while (true) {
       attempt += 1;
 
       try {
@@ -90,19 +90,18 @@ export class CiStatsClient {
       } catch (error) {
         const status: number | undefined = error?.response?.status;
 
-        if (attempt < MAX_ATTEMPTS && (typeof status === 'undefined' || status >= 500)) {
-          const delay = attempt * this.baseRetryMs;
-          this.console.error(
-            `${status} response from ${this.baseUrl}, retrying in`,
-            delay / 1000,
-            'seconds:',
-            'toJSON' in error && typeof error.toJSON === 'function' ? error.toJSON() : error,
-          );
-          await new Promise((resolve) => setTimeout(resolve, delay));
-          continue attemptRequest;
+        if (attempt >= MAX_ATTEMPTS || (typeof status === 'number' && status < 500)) {
+          throw error;
         }
 
-        throw error;
+        const delay = attempt * this.baseRetryMs;
+        this.console.error(
+          `${status} response from ${this.baseUrl}, retrying in`,
+          delay / 1000,
+          'seconds:',
+          'toJSON' in error && typeof error.toJSON === 'function' ? error.toJSON() : error,
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
   }
