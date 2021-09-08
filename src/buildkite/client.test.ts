@@ -15,6 +15,7 @@ describe('BuildkiteClient', () => {
       const job = {
         id: 'id',
         state: 'passed',
+        type: 'script',
       } as Job;
 
       const build = {
@@ -31,6 +32,7 @@ describe('BuildkiteClient', () => {
       const job = {
         id: 'id',
         state: 'failed',
+        type: 'script',
       } as Job;
 
       const build = {
@@ -87,6 +89,23 @@ describe('BuildkiteClient', () => {
 
       const result = buildkite.getJobStatus(build, job);
       expect(result.success).to.eql(false);
+    });
+
+    it('returns success if job is broken but of type: manual', async () => {
+      const job = {
+        id: 'id',
+        state: 'broken',
+        type: 'manual',
+      } as Job;
+
+      const build = {
+        id: 'id',
+        state: 'passed',
+        jobs: [job],
+      } as Build;
+
+      const result = buildkite.getJobStatus(build, job);
+      expect(result.success).to.eql(true);
     });
   });
 });

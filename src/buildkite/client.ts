@@ -75,17 +75,21 @@ export class BuildkiteClient {
       return this.getJobStatus(build, retriedJob);
     }
 
-    const success = ![
-      'waiting_failed',
-      'blocked_failed',
-      'unblocked_failed',
-      'timing_out',
-      'timed_out',
-      'broken',
-      'canceling',
-      'canceled',
-      'failed',
-    ].includes(job.state);
+    // "Manual" steps are for input, when they are skipped, they have state: broken in the API
+    // So let's always mark them as successful, they can't really fail
+    const success =
+      job.type === 'manual' ||
+      ![
+        'waiting_failed',
+        'blocked_failed',
+        'unblocked_failed',
+        'timing_out',
+        'timed_out',
+        'broken',
+        'canceling',
+        'canceled',
+        'failed',
+      ].includes(job.state);
 
     return {
       success,
