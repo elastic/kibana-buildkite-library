@@ -32,4 +32,6 @@ export declare type Job = {
     };
     unblockable: boolean;
     unblock_url: string;
+    parallel_group_index?: null | number;
+    parallel_group_total?: null | number;
 };
