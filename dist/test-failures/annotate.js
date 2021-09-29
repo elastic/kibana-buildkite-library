@@ -86,7 +86,11 @@ exports.annotateTestFailures = async () => {
         .filter((f) => f)
         .sort((a, b) => a.name.localeCompare(b.name));
     buildkite.setAnnotation('test_failures', 'error', exports.getAnnotation(failures, failureHtmlArtifacts));
-    buildkite.setMetadata('pr_comment:test_failures:body', exports.getPrComment(failures, failureHtmlArtifacts));
-    buildkite.setMetadata('slack:test_failures:body', exports.getSlackMessage(failures, failureHtmlArtifacts));
+    if (process.env.PR_COMMENTS_ENABLED === 'true') {
+        buildkite.setMetadata('pr_comment:test_failures:body', exports.getPrComment(failures, failureHtmlArtifacts));
+    }
+    if (process.env.SLACK_NOTIFICATIONS_ENABLED === 'true') {
+        buildkite.setMetadata('slack:test_failures:body', exports.getSlackMessage(failures, failureHtmlArtifacts));
+    }
 };
 //# sourceMappingURL=annotate.js.map
