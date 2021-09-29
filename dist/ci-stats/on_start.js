@@ -7,6 +7,7 @@ const ciStats = new client_1.CiStatsClient();
 async function onStart() {
     const build = await ciStats.createBuild();
     child_process_1.execSync(`buildkite-agent meta-data set ci_stats_build_id "${build.id}"`);
+    // TODO Will need to set MERGE_BASE for PRs
     await ciStats.addGitInfo(build.id);
 }
 exports.onStart = onStart;

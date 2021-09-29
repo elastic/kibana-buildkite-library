@@ -27,10 +27,6 @@ class CiStatsClient {
                 result: buildStatus,
             });
         };
-        this.getPrReport = async (buildId = process.env.CI_STATS_BUILD_ID) => {
-            const resp = await this.http.get(`v2/pr_report?buildId=${buildId}`);
-            return resp.data;
-        };
         const CI_STATS_HOST = (_a = config.baseUrl) !== null && _a !== void 0 ? _a : process.env.CI_STATS_HOST;
         const CI_STATS_TOKEN = (_b = config.token) !== null && _b !== void 0 ? _b : process.env.CI_STATS_TOKEN;
         this.http = axios_1.default.create({
