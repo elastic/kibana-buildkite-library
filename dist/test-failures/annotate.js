@@ -61,7 +61,7 @@ exports.annotateTestFailures = async () => {
     const exec = (cmd) => child_process_1.execSync(cmd, { stdio: 'inherit' });
     const failureDir = 'target/process-test-failures';
     fs_1.mkdirSync(failureDir, { recursive: true });
-    exec(`buildkite-agent artifact download "target/test_failures/*/*.json" "${failureDir}"`);
+    exec(`buildkite-agent artifact download "target/test_failures/*.json" "${failureDir}"`);
     const artifacts = await buildkite.getArtifactsForCurrentBuild();
     const failureHtmlArtifacts = {};
     for (const artifact of artifacts) {

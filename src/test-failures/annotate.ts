@@ -106,7 +106,7 @@ export const annotateTestFailures = async () => {
 
   const failureDir = 'target/process-test-failures';
   mkdirSync(failureDir, { recursive: true });
-  exec(`buildkite-agent artifact download "target/test_failures/*/*.json" "${failureDir}"`);
+  exec(`buildkite-agent artifact download "target/test_failures/*.json" "${failureDir}"`);
 
   const artifacts = await buildkite.getArtifactsForCurrentBuild();
   const failureHtmlArtifacts: Record<string, Artifact> = {};
