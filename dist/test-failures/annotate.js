@@ -19,7 +19,7 @@ const recursiveReadDir = (dirPath, allFiles = []) => {
     return allFiles;
 };
 exports.getAnnotation = (failures, failureHtmlArtifacts) => {
-    return (`**Test Failures**\n` +
+    return (`**Test Failures**<br />\n` +
         failures
             .map((failure) => {
             const jobUrl = `${failure.url}#${failure.jobId}`;
@@ -40,9 +40,10 @@ exports.getPrComment = (failures, failureHtmlArtifacts) => {
                 ? `${jobUrl}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
                 : '';
             const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
-            return `[[job]](${jobUrl})${logsLink} ${failure.jobName} / ${failure.name}`;
+            // job name could have #<number> in it, which Github will link to an issue, so we need to "escape" it with spans
+            return `[[job]](${jobUrl})${logsLink} ${failure.jobName.replace('#', '#<span></span>')} / ${failure.name}`;
         })
-            .join('<br />\n'));
+            .join('\n'));
 };
 exports.getSlackMessage = (failures, failureHtmlArtifacts) => {
     return (`*Test Failures*\n` +
@@ -61,7 +62,6 @@ exports.annotateTestFailures = async () => {
     const exec = (cmd) => child_process_1.execSync(cmd, { stdio: 'inherit' });
     const failureDir = 'target/process-test-failures';
     fs_1.mkdirSync(failureDir, { recursive: true });
-    exec(`buildkite-agent artifact download "target/test_failures/*.json" "${failureDir}"`);
     const artifacts = await buildkite.getArtifactsForCurrentBuild();
     const failureHtmlArtifacts = {};
     for (const artifact of artifacts) {
@@ -70,6 +70,7 @@ exports.annotateTestFailures = async () => {
             failureHtmlArtifacts[hash] = artifact;
         }
     }
+    exec(`buildkite-agent artifact download "target/test_failures/*.json" "${failureDir}"`);
     const failures = recursiveReadDir(failureDir)
         .map((file) => {
         try {
