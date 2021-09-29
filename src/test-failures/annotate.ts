@@ -114,10 +114,12 @@ export const annotateTestFailures = async () => {
   const failureHtmlArtifacts: Record<string, Artifact> = {};
   for (const artifact of artifacts) {
     if (artifact.path.match(/test_failures\/.*?\.html$/)) {
-      const [_, hash] = artifact.filename.split('_');
+      const [_, hash] = artifact.filename.split(/_|\./);
       failureHtmlArtifacts[hash] = artifact;
     }
   }
+
+  console.log(failureHtmlArtifacts);
 
   exec(`buildkite-agent artifact download "target/test_failures/*.json" "${failureDir}"`);
 
