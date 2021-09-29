@@ -24,7 +24,7 @@ exports.getAnnotation = (failures, failureHtmlArtifacts) => {
             .map((failure) => {
             const jobUrl = `${failure.url}#${failure.jobId}`;
             const artifactUrl = failure.hash in failureHtmlArtifacts
-                ? `${failure.url}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
+                ? `${failure.url}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
                 : '';
             const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
             return `[[job]](${jobUrl})${logsLink} ${failure.jobName} / ${failure.name}`;
@@ -37,7 +37,7 @@ exports.getPrComment = (failures, failureHtmlArtifacts) => {
             .map((failure) => {
             const jobUrl = `${failure.url}#${failure.jobId}`;
             const artifactUrl = failure.hash in failureHtmlArtifacts
-                ? `${failure.url}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
+                ? `${failure.url}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
                 : '';
             const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
             // job name could have #<number> in it, which Github will link to an issue, so we need to "escape" it with spans
@@ -51,7 +51,7 @@ exports.getSlackMessage = (failures, failureHtmlArtifacts) => {
             .map((failure) => {
             const jobUrl = `${failure.url}#${failure.jobId}`;
             const artifactUrl = failure.hash in failureHtmlArtifacts
-                ? `${failure.url}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
+                ? `${failure.url}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
                 : '';
             const logsLink = artifactUrl ? ` <${artifactUrl}|[logs]>` : '';
             return `<${jobUrl}|[job]>${logsLink} ${failure.jobName} / ${failure.name}`;
@@ -70,7 +70,6 @@ exports.annotateTestFailures = async () => {
             failureHtmlArtifacts[hash] = artifact;
         }
     }
-    console.log(failureHtmlArtifacts);
     exec(`buildkite-agent artifact download "target/test_failures/*.json" "${failureDir}"`);
     const failures = recursiveReadDir(failureDir)
         .map((file) => {
