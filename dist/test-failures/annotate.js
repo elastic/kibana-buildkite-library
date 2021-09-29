@@ -74,7 +74,7 @@ exports.annotateTestFailures = async () => {
         .map((file) => {
         try {
             if (file.endsWith('.json')) {
-                return JSON.parse(fs_1.readFileSync(path_1.join(failureDir, file)).toString());
+                return JSON.parse(fs_1.readFileSync(file).toString());
             }
         }
         catch (ex) {
