@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { mkdirSync, readdirSync, readFileSync } from 'fs';
+import { mkdirSync, readdirSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
 import { BuildkiteClient } from '..';
 import { Artifact } from '../buildkite/types/artifact';
@@ -19,6 +19,20 @@ export type TestFailure = {
   jobId: string;
   url: string;
   jobName: string;
+};
+
+const recursiveReadDir = (dirPath: string, allFiles: string[] = []) => {
+  const files = readdirSync(dirPath);
+
+  for (const file of files) {
+    if (statSync(join(dirPath, file)).isDirectory()) {
+      allFiles = recursiveReadDir(join(dirPath, file), allFiles);
+    } else {
+      allFiles.push(join(dirPath, file));
+    }
+  }
+
+  return allFiles;
 };
 
 export const getAnnotation = (
@@ -70,7 +84,7 @@ export const getSlackMessage = (
   failureHtmlArtifacts: Record<string, Artifact>,
 ): string => {
   return (
-    `**Test Failures**\n` +
+    `*Test Failures*\n` +
     failures
       .map((failure) => {
         const jobUrl = `${failure.url}#${failure.jobId}`;
@@ -79,9 +93,9 @@ export const getSlackMessage = (
             ? `${jobUrl}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
             : '';
 
-        const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
+        const logsLink = artifactUrl ? ` <${artifactUrl}|[logs]>` : '';
 
-        return `[[job]](${jobUrl})${logsLink} ${failure.jobName} / ${failure.name}`;
+        return `<${jobUrl}|[job]>${logsLink} ${failure.jobName} / ${failure.name}`;
       })
       .join('<br />\n')
   );
@@ -92,7 +106,7 @@ export const annotateTestFailures = async () => {
 
   const failureDir = 'target/process-test-failures';
   mkdirSync(failureDir, { recursive: true });
-  exec(`buildkite-agent artifact download "test_failures/*/*.json" "${failureDir}"`);
+  exec(`buildkite-agent artifact download "target/test_failures/*/*.json" "${failureDir}"`);
 
   const artifacts = await buildkite.getArtifactsForCurrentBuild();
   const failureHtmlArtifacts: Record<string, Artifact> = {};
@@ -103,7 +117,7 @@ export const annotateTestFailures = async () => {
     }
   }
 
-  const failures: TestFailure[] = readdirSync(failureDir)
+  const failures: TestFailure[] = recursiveReadDir(failureDir)
     .map((file) => {
       try {
         if (file.endsWith('.json')) {
