@@ -7,6 +7,9 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
+import { execSync } from 'child_process';
+import parseLinkHeader from './parse_link_header';
+import { Artifact } from './types/artifact';
 import { Build, BuildStatus } from './types/build';
 import { Job, JobState } from './types/job';
 
@@ -119,5 +122,53 @@ export class BuildkiteClient {
 
   getCurrentBuildStatus = async (includeRetriedJobs = false) => {
     return this.getBuildStatus(await this.getCurrentBuild(includeRetriedJobs));
+  };
+
+  getArtifacts = async (pipelineSlug: string, buildNumber: string | number): Promise<Artifact[]> => {
+    let link = `v2/organizations/elastic/pipelines/${pipelineSlug}/builds/${buildNumber}/artifacts?per_page=100`;
+    const artifacts = [];
+
+    // Don't get stuck in an infinite loop or follow more than 50 pages
+    for (let i = 0; i < 50; i++) {
+      if (!link) {
+        break;
+      }
+
+      const resp = await this.http.get(link);
+      link = '';
+
+      artifacts.push(await resp.data);
+
+      if (resp.headers.link) {
+        const result = parseLinkHeader(resp.headers.link as string);
+        if (result?.next) {
+          link = result.next;
+        }
+      }
+    }
+
+    return artifacts.flat();
+  };
+
+  getArtifactsForCurrentBuild = (): Promise<Artifact[]> => {
+    if (!process.env.BUILDKITE_PIPELINE_SLUG || !process.env.BUILDKITE_BUILD_NUMBER) {
+      throw new Error('BUILDKITE_PIPELINE_SLUG and BUILDKITE_BUILD_NUMBER must be set to get current build');
+    }
+
+    return this.getArtifacts(process.env.BUILDKITE_PIPELINE_SLUG, process.env.BUILDKITE_BUILD_NUMBER);
+  };
+
+  setMetadata = (key: string, value: string) => {
+    execSync(`buildkite-agent meta-data set '${key}'`, {
+      input: value,
+      stdio: ['pipe', 'inherit', 'inherit'],
+    });
+  };
+
+  setAnnotation = (context: string, style: 'info' | 'success' | 'warning' | 'error', value: string) => {
+    execSync(`buildkite-agent annotate --context '${context}' --style '${style}'`, {
+      input: value,
+      stdio: ['pipe', 'inherit', 'inherit'],
+    });
   };
 }

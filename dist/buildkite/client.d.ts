@@ -1,4 +1,5 @@
 import { AxiosInstance } from 'axios';
+import { Artifact } from './types/artifact';
 import { Build, BuildStatus } from './types/build';
 import { Job, JobState } from './types/job';
 export declare type BuildkiteClientConfig = {
@@ -16,4 +17,8 @@ export declare class BuildkiteClient {
     };
     getBuildStatus: (build: Build) => BuildStatus;
     getCurrentBuildStatus: (includeRetriedJobs?: boolean) => Promise<BuildStatus>;
+    getArtifacts: (pipelineSlug: string, buildNumber: string | number) => Promise<Artifact[]>;
+    getArtifactsForCurrentBuild: () => Promise<Artifact[]>;
+    setMetadata: (key: string, value: string) => void;
+    setAnnotation: (context: string, style: 'info' | 'success' | 'warning' | 'error', value: string) => void;
 }
