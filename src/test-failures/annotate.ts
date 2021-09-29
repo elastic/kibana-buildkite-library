@@ -121,7 +121,7 @@ export const annotateTestFailures = async () => {
     .map((file) => {
       try {
         if (file.endsWith('.json')) {
-          return JSON.parse(readFileSync(join(failureDir, file)).toString());
+          return JSON.parse(readFileSync(file).toString());
         }
       } catch (ex) {
         console.error((ex as Error).message);
