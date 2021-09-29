@@ -32,7 +32,7 @@ exports.getAnnotation = (failures, failureHtmlArtifacts) => {
             .join('<br />\n'));
 };
 exports.getPrComment = (failures, failureHtmlArtifacts) => {
-    return (`**Test Failures**\n` +
+    return (`### Test Failures\n` +
         failures
             .map((failure) => {
             const jobUrl = `${failure.url}#${failure.jobId}`;

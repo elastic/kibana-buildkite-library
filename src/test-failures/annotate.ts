@@ -62,7 +62,7 @@ export const getPrComment = (
   failureHtmlArtifacts: Record<string, Artifact>,
 ): string => {
   return (
-    `**Test Failures**\n` +
+    `### Test Failures\n` +
     failures
       .map((failure) => {
         const jobUrl = `${failure.url}#${failure.jobId}`;
