@@ -46,7 +46,7 @@ export const getAnnotation = (
         const jobUrl = `${failure.url}#${failure.jobId}`;
         const artifactUrl =
           failure.hash in failureHtmlArtifacts
-            ? `${failure.url}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
+            ? `${failure.url}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
             : '';
 
         const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
@@ -68,7 +68,7 @@ export const getPrComment = (
         const jobUrl = `${failure.url}#${failure.jobId}`;
         const artifactUrl =
           failure.hash in failureHtmlArtifacts
-            ? `${failure.url}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
+            ? `${failure.url}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
             : '';
 
         const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
@@ -93,7 +93,7 @@ export const getSlackMessage = (
         const jobUrl = `${failure.url}#${failure.jobId}`;
         const artifactUrl =
           failure.hash in failureHtmlArtifacts
-            ? `${failure.url}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
+            ? `${failure.url}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
             : '';
 
         const logsLink = artifactUrl ? ` <${artifactUrl}|[logs]>` : '';
@@ -118,8 +118,6 @@ export const annotateTestFailures = async () => {
       failureHtmlArtifacts[hash] = artifact;
     }
   }
-
-  console.log(failureHtmlArtifacts);
 
   exec(`buildkite-agent artifact download "target/test_failures/*.json" "${failureDir}"`);
 
