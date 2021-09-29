@@ -70,7 +70,7 @@ exports.annotateTestFailures = async () => {
             failureHtmlArtifacts[hash] = artifact;
         }
     }
-    exec(`buildkite-agent artifact download "target/test_failures/*.json" "${failureDir}"`);
+    exec(`buildkite-agent artifact download --include-retried-jobs "target/test_failures/*.json" "${failureDir}"`);
     const failures = recursiveReadDir(failureDir)
         .map((file) => {
         try {
