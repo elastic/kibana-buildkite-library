@@ -6,7 +6,7 @@ import { Artifact } from '../buildkite/types/artifact';
 
 const buildkite = new BuildkiteClient();
 
-type TestFailure = {
+export type TestFailure = {
   name: string;
   classname: string;
   time: string;
@@ -19,6 +19,72 @@ type TestFailure = {
   jobId: string;
   url: string;
   jobName: string;
+};
+
+export const getAnnotation = (
+  failures: TestFailure[],
+  failureHtmlArtifacts: Record<string, Artifact>,
+): string => {
+  return (
+    `**Test Failures**\n` +
+    failures
+      .map((failure) => {
+        const jobUrl = `${failure.url}#${failure.jobId}`;
+        const artifactUrl =
+          failure.hash in failureHtmlArtifacts
+            ? `${jobUrl}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
+            : '';
+
+        const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
+
+        return `[[job]](${jobUrl})${logsLink} ${failure.jobName} / ${failure.name}`;
+      })
+      .join('<br />\n')
+  );
+};
+
+export const getPrComment = (
+  failures: TestFailure[],
+  failureHtmlArtifacts: Record<string, Artifact>,
+): string => {
+  return (
+    `**Test Failures**\n` +
+    failures
+      .map((failure) => {
+        const jobUrl = `${failure.url}#${failure.jobId}`;
+        const artifactUrl =
+          failure.hash in failureHtmlArtifacts
+            ? `${jobUrl}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
+            : '';
+
+        const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
+
+        return `[[job]](${jobUrl})${logsLink} ${failure.jobName} / ${failure.name}`;
+      })
+      .join('<br />\n')
+  );
+};
+
+export const getSlackMessage = (
+  failures: TestFailure[],
+  failureHtmlArtifacts: Record<string, Artifact>,
+): string => {
+  return (
+    `**Test Failures**\n` +
+    failures
+      .map((failure) => {
+        const jobUrl = `${failure.url}#${failure.jobId}`;
+        const artifactUrl =
+          failure.hash in failureHtmlArtifacts
+            ? `${jobUrl}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
+            : '';
+
+        const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
+
+        return `[[job]](${jobUrl})${logsLink} ${failure.jobName} / ${failure.name}`;
+      })
+      .join('<br />\n')
+  );
 };
 
 export const annotateTestFailures = async () => {
@@ -48,28 +114,10 @@ export const annotateTestFailures = async () => {
       }
       return null;
     })
-    .filter((f) => f);
+    .filter((f) => f)
+    .sort((a, b) => a.name.localeCompare(b.name));
 
-  const failuresMarkdown =
-    `**Test Failures**\n` +
-    failures
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map((failure) => {
-        const jobUrl = `${failure.url}#${failure.jobId}`;
-        const artifactUrl =
-          failure.hash in failureHtmlArtifacts
-            ? `${jobUrl}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
-            : '';
-
-        const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
-
-        return `[[job]](${jobUrl})${logsLink} ${failure.jobName} / ${failure.name}`;
-      })
-      .join('<br />\n');
-
-  buildkite.setAnnotation('test_failures', 'error', failuresMarkdown);
-  buildkite.setMetadata('pr_comment:test_failures:body', failuresMarkdown);
-  buildkite.setMetadata('slack:test_failures:body', failuresMarkdown); // TODO links are a different format
-
-  console.log(failuresMarkdown);
+  buildkite.setAnnotation('test_failures', 'error', getAnnotation(failures, failureHtmlArtifacts));
+  buildkite.setMetadata('pr_comment:test_failures:body', getPrComment(failures, failureHtmlArtifacts));
+  buildkite.setMetadata('slack:test_failures:body', getSlackMessage(failures, failureHtmlArtifacts));
 };
