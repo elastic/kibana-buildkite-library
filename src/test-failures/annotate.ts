@@ -46,7 +46,10 @@ export const getAnnotation = (
         const jobUrl = `${failure.url}#${failure.jobId}`;
         const artifactUrl =
           failure.hash in failureHtmlArtifacts
-            ? `${failure.url}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
+            ? `${failure.url.replace(
+                'https://buildkite.com/elastic',
+                'https://buildkite.com/organizations/elastic/pipelines',
+              )}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
             : '';
 
         const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
@@ -68,7 +71,10 @@ export const getPrComment = (
         const jobUrl = `${failure.url}#${failure.jobId}`;
         const artifactUrl =
           failure.hash in failureHtmlArtifacts
-            ? `${failure.url}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
+            ? `${failure.url.replace(
+                'https://buildkite.com/elastic',
+                'https://buildkite.com/organizations/elastic/pipelines',
+              )}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
             : '';
 
         const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
@@ -93,7 +99,10 @@ export const getSlackMessage = (
         const jobUrl = `${failure.url}#${failure.jobId}`;
         const artifactUrl =
           failure.hash in failureHtmlArtifacts
-            ? `${failure.url}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
+            ? `${failure.url.replace(
+                'https://buildkite.com/elastic',
+                'https://buildkite.com/organizations/elastic/pipelines',
+              )}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
             : '';
 
         const logsLink = artifactUrl ? ` <${artifactUrl}|[logs]>` : '';

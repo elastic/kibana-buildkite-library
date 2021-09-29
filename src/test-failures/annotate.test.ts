@@ -8,7 +8,7 @@ let mockArtifacts: Record<string, Artifact>;
 describe('Annotate', () => {
   beforeEach(() => {
     mockFailure = {
-      url: 'http://localhost',
+      url: 'https://buildkite.com/elastic/kibana-pull-request/builds/53',
       jobId: 'job-id',
       buildId: 'build-id',
       hash: 'hash',
@@ -29,7 +29,7 @@ describe('Annotate', () => {
       const annotation = getAnnotation([mockFailure], {});
 
       expect(annotation).to.eql(
-        '**Test Failures**<br />\n[[job]](http://localhost#job-id) OSS CI Group #1 / test should fail',
+        '**Test Failures**<br />\n[[job]](https://buildkite.com/elastic/kibana-pull-request/builds/53#job-id) OSS CI Group #1 / test should fail',
       );
     });
 
@@ -37,7 +37,7 @@ describe('Annotate', () => {
       const annotation = getAnnotation([mockFailure], mockArtifacts);
 
       expect(annotation).to.eql(
-        '**Test Failures**<br />\n[[job]](http://localhost#job-id) [[logs]](http://localhost/jobs/job-id/artifacts/artifact-id) OSS CI Group #1 / test should fail',
+        '**Test Failures**<br />\n[[job]](https://buildkite.com/elastic/kibana-pull-request/builds/53#job-id) [[logs]](https://buildkite.com/organizations/elastic/pipelines/kibana-pull-request/builds/53/jobs/job-id/artifacts/artifact-id) OSS CI Group #1 / test should fail',
       );
     });
   });
@@ -47,7 +47,7 @@ describe('Annotate', () => {
       const annotation = getSlackMessage([mockFailure], {});
 
       expect(annotation).to.eql(
-        '*Test Failures*\n<http://localhost#job-id|[job]> OSS CI Group #1 / test should fail',
+        '*Test Failures*\n<https://buildkite.com/elastic/kibana-pull-request/builds/53#job-id|[job]> OSS CI Group #1 / test should fail',
       );
     });
 
@@ -55,7 +55,7 @@ describe('Annotate', () => {
       const annotation = getSlackMessage([mockFailure], mockArtifacts);
 
       expect(annotation).to.eql(
-        '*Test Failures*\n<http://localhost#job-id|[job]> <http://localhost/jobs/job-id/artifacts/artifact-id|[logs]> OSS CI Group #1 / test should fail',
+        '*Test Failures*\n<https://buildkite.com/elastic/kibana-pull-request/builds/53#job-id|[job]> <https://buildkite.com/organizations/elastic/pipelines/kibana-pull-request/builds/53/jobs/job-id/artifacts/artifact-id|[logs]> OSS CI Group #1 / test should fail',
       );
     });
   });
@@ -65,7 +65,7 @@ describe('Annotate', () => {
       const annotation = getPrComment([mockFailure], {});
 
       expect(annotation).to.eql(
-        '### Test Failures\n[[job]](http://localhost#job-id) OSS CI Group #<span></span>1 / test should fail',
+        '### Test Failures\n[[job]](https://buildkite.com/elastic/kibana-pull-request/builds/53#job-id) OSS CI Group #<span></span>1 / test should fail',
       );
     });
 
@@ -73,7 +73,7 @@ describe('Annotate', () => {
       const annotation = getPrComment([mockFailure], mockArtifacts);
 
       expect(annotation).to.eql(
-        '### Test Failures\n[[job]](http://localhost#job-id) [[logs]](http://localhost/jobs/job-id/artifacts/artifact-id) OSS CI Group #<span></span>1 / test should fail',
+        '### Test Failures\n[[job]](https://buildkite.com/elastic/kibana-pull-request/builds/53#job-id) [[logs]](https://buildkite.com/organizations/elastic/pipelines/kibana-pull-request/builds/53/jobs/job-id/artifacts/artifact-id) OSS CI Group #<span></span>1 / test should fail',
       );
     });
   });
