@@ -9,6 +9,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BuildkiteClient = void 0;
 const axios_1 = require("axios");
+const child_process_1 = require("child_process");
+const parse_link_header_1 = require("./parse_link_header");
 class BuildkiteClient {
     constructor(config = {}) {
         var _a, _b, _c;
@@ -69,6 +71,44 @@ class BuildkiteClient {
         };
         this.getCurrentBuildStatus = async (includeRetriedJobs = false) => {
             return this.getBuildStatus(await this.getCurrentBuild(includeRetriedJobs));
+        };
+        this.getArtifacts = async (pipelineSlug, buildNumber) => {
+            let link = `v2/organizations/elastic/pipelines/${pipelineSlug}/builds/${buildNumber}/artifacts?per_page=100`;
+            const artifacts = [];
+            // Don't get stuck in an infinite loop or follow more than 50 pages
+            for (let i = 0; i < 50; i++) {
+                if (!link) {
+                    break;
+                }
+                const resp = await this.http.get(link);
+                link = '';
+                artifacts.push(await resp.data);
+                if (resp.headers.link) {
+                    const result = parse_link_header_1.default(resp.headers.link);
+                    if (result === null || result === void 0 ? void 0 : result.next) {
+                        link = result.next;
+                    }
+                }
+            }
+            return artifacts.flat();
+        };
+        this.getArtifactsForCurrentBuild = () => {
+            if (!process.env.BUILDKITE_PIPELINE_SLUG || !process.env.BUILDKITE_BUILD_NUMBER) {
+                throw new Error('BUILDKITE_PIPELINE_SLUG and BUILDKITE_BUILD_NUMBER must be set to get current build');
+            }
+            return this.getArtifacts(process.env.BUILDKITE_PIPELINE_SLUG, process.env.BUILDKITE_BUILD_NUMBER);
+        };
+        this.setMetadata = (key, value) => {
+            child_process_1.execSync(`buildkite-agent meta-data set '${key}'`, {
+                input: value,
+                stdio: ['pipe', 'inherit', 'inherit'],
+            });
+        };
+        this.setAnnotation = (context, style, value) => {
+            child_process_1.execSync(`buildkite-agent annotate --context '${context}' --style '${style}'`, {
+                input: value,
+                stdio: ['pipe', 'inherit', 'inherit'],
+            });
         };
         const BUILDKITE_BASE_URL = (_b = (_a = config.baseUrl) !== null && _a !== void 0 ? _a : process.env.BUILDKITE_BASE_URL) !== null && _b !== void 0 ? _b : 'https://api.buildkite.com';
         const BUILDKITE_TOKEN = (_c = config.token) !== null && _c !== void 0 ? _c : process.env.BUILDKITE_TOKEN;
