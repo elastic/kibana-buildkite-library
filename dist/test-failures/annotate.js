@@ -22,9 +22,10 @@ exports.getAnnotation = (failures, failureHtmlArtifacts) => {
     return (`**Test Failures**<br />\n` +
         failures
             .map((failure) => {
+            const lookup = failure.jobId + failure.hash;
             const jobUrl = `${failure.url}#${failure.jobId}`;
-            const artifactUrl = failure.hash in failureHtmlArtifacts
-                ? `${failure.url.replace('https://buildkite.com/elastic', 'https://buildkite.com/organizations/elastic/pipelines')}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
+            const artifactUrl = lookup in failureHtmlArtifacts
+                ? `${failure.url.replace('https://buildkite.com/elastic', 'https://buildkite.com/organizations/elastic/pipelines')}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[lookup].id}`
                 : '';
             const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
             return `[[job]](${jobUrl})${logsLink} ${failure.jobName} / ${failure.name}`;
@@ -35,9 +36,10 @@ exports.getPrComment = (failures, failureHtmlArtifacts) => {
     return (`### Test Failures\n` +
         failures
             .map((failure) => {
+            const lookup = failure.jobId + failure.hash;
             const jobUrl = `${failure.url}#${failure.jobId}`;
-            const artifactUrl = failure.hash in failureHtmlArtifacts
-                ? `${failure.url.replace('https://buildkite.com/elastic', 'https://buildkite.com/organizations/elastic/pipelines')}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
+            const artifactUrl = lookup in failureHtmlArtifacts
+                ? `${failure.url.replace('https://buildkite.com/elastic', 'https://buildkite.com/organizations/elastic/pipelines')}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[lookup].id}`
                 : '';
             const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
             // job name could have #<number> in it, which Github will link to an issue, so we need to "escape" it with spans
@@ -49,9 +51,10 @@ exports.getSlackMessage = (failures, failureHtmlArtifacts) => {
     return (`*Test Failures*\n` +
         failures
             .map((failure) => {
+            const lookup = failure.jobId + failure.hash;
             const jobUrl = `${failure.url}#${failure.jobId}`;
-            const artifactUrl = failure.hash in failureHtmlArtifacts
-                ? `${failure.url.replace('https://buildkite.com/elastic', 'https://buildkite.com/organizations/elastic/pipelines')}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
+            const artifactUrl = lookup in failureHtmlArtifacts
+                ? `${failure.url.replace('https://buildkite.com/elastic', 'https://buildkite.com/organizations/elastic/pipelines')}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[lookup].id}`
                 : '';
             const logsLink = artifactUrl ? ` <${artifactUrl}|[logs]>` : '';
             return `<${jobUrl}|[job]>${logsLink} ${failure.jobName} / ${failure.name}`;
@@ -66,8 +69,8 @@ exports.annotateTestFailures = async () => {
     const failureHtmlArtifacts = {};
     for (const artifact of artifacts) {
         if (artifact.path.match(/test_failures\/.*?\.html$/)) {
-            const [_, hash] = artifact.filename.split(/_|\./);
-            failureHtmlArtifacts[hash] = artifact;
+            const [jobId, hash] = artifact.filename.split(/_|\./);
+            failureHtmlArtifacts[jobId + hash] = artifact;
         }
     }
     exec(`buildkite-agent artifact download --include-retried-jobs "target/test_failures/*.json" "${failureDir}"`);

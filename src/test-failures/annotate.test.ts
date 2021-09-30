@@ -18,7 +18,7 @@ describe('Annotate', () => {
     } as TestFailure;
 
     mockArtifacts = {
-      hash: {
+      'job-idhash': {
         id: 'artifact-id',
       } as Artifact,
     };

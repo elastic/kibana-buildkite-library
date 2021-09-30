@@ -43,13 +43,14 @@ export const getAnnotation = (
     `**Test Failures**<br />\n` +
     failures
       .map((failure) => {
+        const lookup = failure.jobId + failure.hash;
         const jobUrl = `${failure.url}#${failure.jobId}`;
         const artifactUrl =
-          failure.hash in failureHtmlArtifacts
+          lookup in failureHtmlArtifacts
             ? `${failure.url.replace(
                 'https://buildkite.com/elastic',
                 'https://buildkite.com/organizations/elastic/pipelines',
-              )}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
+              )}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[lookup].id}`
             : '';
 
         const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
@@ -68,13 +69,14 @@ export const getPrComment = (
     `### Test Failures\n` +
     failures
       .map((failure) => {
+        const lookup = failure.jobId + failure.hash;
         const jobUrl = `${failure.url}#${failure.jobId}`;
         const artifactUrl =
-          failure.hash in failureHtmlArtifacts
+          lookup in failureHtmlArtifacts
             ? `${failure.url.replace(
                 'https://buildkite.com/elastic',
                 'https://buildkite.com/organizations/elastic/pipelines',
-              )}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
+              )}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[lookup].id}`
             : '';
 
         const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
@@ -96,13 +98,14 @@ export const getSlackMessage = (
     `*Test Failures*\n` +
     failures
       .map((failure) => {
+        const lookup = failure.jobId + failure.hash;
         const jobUrl = `${failure.url}#${failure.jobId}`;
         const artifactUrl =
-          failure.hash in failureHtmlArtifacts
+          lookup in failureHtmlArtifacts
             ? `${failure.url.replace(
                 'https://buildkite.com/elastic',
                 'https://buildkite.com/organizations/elastic/pipelines',
-              )}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[failure.hash].id}`
+              )}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[lookup].id}`
             : '';
 
         const logsLink = artifactUrl ? ` <${artifactUrl}|[logs]>` : '';
@@ -123,8 +126,8 @@ export const annotateTestFailures = async () => {
   const failureHtmlArtifacts: Record<string, Artifact> = {};
   for (const artifact of artifacts) {
     if (artifact.path.match(/test_failures\/.*?\.html$/)) {
-      const [_, hash] = artifact.filename.split(/_|\./);
-      failureHtmlArtifacts[hash] = artifact;
+      const [jobId, hash] = artifact.filename.split(/_|\./);
+      failureHtmlArtifacts[jobId + hash] = artifact;
     }
   }
 
