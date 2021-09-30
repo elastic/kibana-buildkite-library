@@ -43,7 +43,7 @@ exports.getPrComment = (failures, failureHtmlArtifacts) => {
                 : '';
             const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
             // job name could have #<number> in it, which Github will link to an issue, so we need to "escape" it with spans
-            return `[[job]](${jobUrl})${logsLink} ${failure.jobName.replace('#', '#<span></span>')} / ${failure.name}`;
+            return `* [[job]](${jobUrl})${logsLink} ${failure.jobName.replace('#', '#<span></span>')} / ${failure.name}`;
         })
             .join('\n'));
 };
