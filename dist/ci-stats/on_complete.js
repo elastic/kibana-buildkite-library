@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.onComplete = void 0;
-const child_process_1 = require("child_process");
 const buildkite_1 = require("../buildkite");
 const client_1 = require("./client");
 const buildkite = new buildkite_1.BuildkiteClient();
@@ -15,10 +14,14 @@ async function onComplete() {
         if (process.env.GITHUB_PR_NUMBER) {
             const report = await ciStats.getPrReport(process.env.CI_STATS_BUILD_ID);
             if (report === null || report === void 0 ? void 0 : report.md) {
-                process.env.CI_STATS_REPORT = report.md;
-                child_process_1.execSync('buildkite-agent meta-data set pr_comment:ci_stats_report:body "$CI_STATS_REPORT"', {
-                    stdio: 'inherit',
-                });
+                buildkite.setMetadata('pr_comment:ci_stats_report:body', report.md);
+                const annotationType = (report === null || report === void 0 ? void 0 : report.success) ? 'info' : 'error';
+                buildkite.setAnnotation('ci-stats-report', annotationType, report.md);
+            }
+            if (report && !report.success) {
+                console.log('+++ CI Stats Report');
+                console.error('Failing build due to CI Stats report. See annotation at top of build.');
+                process.exit(1);
             }
         }
     }

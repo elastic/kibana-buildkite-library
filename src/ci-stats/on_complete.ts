@@ -1,4 +1,3 @@
-import { execSync } from 'child_process';
 import { BuildkiteClient } from '../buildkite';
 import { CiStatsClient } from './client';
 
@@ -15,11 +14,16 @@ export async function onComplete() {
     if (process.env.GITHUB_PR_NUMBER) {
       const report = await ciStats.getPrReport(process.env.CI_STATS_BUILD_ID);
       if (report?.md) {
-        process.env.CI_STATS_REPORT = report.md;
+        buildkite.setMetadata('pr_comment:ci_stats_report:body', report.md);
 
-        execSync('buildkite-agent meta-data set pr_comment:ci_stats_report:body "$CI_STATS_REPORT"', {
-          stdio: 'inherit',
-        });
+        const annotationType = report?.success ? 'info' : 'error';
+        buildkite.setAnnotation('ci-stats-report', annotationType, report.md);
+      }
+
+      if (report && !report.success) {
+        console.log('+++ CI Stats Report');
+        console.error('Failing build due to CI Stats report. See annotation at top of build.');
+        process.exit(1);
       }
     }
   }
