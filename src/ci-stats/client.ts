@@ -9,6 +9,11 @@ export type CiStatsBuild = {
   id: string;
 };
 
+export type CiStatsPrReport = {
+  md: string;
+  success: boolean;
+};
+
 export class CiStatsClient {
   http: AxiosInstance;
 
@@ -24,7 +29,7 @@ export class CiStatsClient {
     });
   }
 
-  createBuild = async () => {
+  createBuild = async (): Promise<CiStatsBuild> => {
     const resp = await this.http.post('/v1/build', {
       jenkinsJobName: process.env.BUILDKITE_PIPELINE_NAME,
       jenkinsJobId: process.env.BUILDKITE_BUILD_ID,
@@ -32,7 +37,7 @@ export class CiStatsClient {
       prId: process.env.GITHUB_PR_NUMBER || null,
     });
 
-    return resp.data as CiStatsBuild;
+    return resp.data;
   };
 
   addGitInfo = (buildId: string) => {
@@ -41,7 +46,7 @@ export class CiStatsClient {
       commit: process.env.BUILDKITE_COMMIT,
       targetBranch:
         process.env.GITHUB_PR_TARGET_BRANCH || process.env.BUILDKITE_PULL_REQUEST_BASE_BRANCH || null,
-      mergeBase: process.env.GITHUB_PR_MERGE_BASE || null, // TODO confirm GITHUB_PR_MERGE_BASE or switch to final var
+      mergeBase: process.env.GITHUB_PR_MERGE_BASE || null,
     });
   };
 
@@ -49,5 +54,11 @@ export class CiStatsClient {
     return this.http.post(`/v1/build/_complete?id=${buildId}`, {
       result: buildStatus,
     });
+  };
+
+  getPrReport = async (buildId = process.env.CI_STATS_BUILD_ID): Promise<CiStatsPrReport> => {
+    const resp = await this.http.get(`v2/pr_report?buildId=${buildId}`);
+
+    return resp.data;
   };
 }
