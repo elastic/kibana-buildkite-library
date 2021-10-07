@@ -59,7 +59,7 @@ exports.getSlackMessage = (failures, failureHtmlArtifacts) => {
             const logsLink = artifactUrl ? ` <${artifactUrl}|[logs]>` : '';
             return `<${jobUrl}|[job]>${logsLink} ${failure.jobName} / ${failure.name}`;
         })
-            .join('<br />\n'));
+            .join('\n'));
 };
 exports.annotateTestFailures = async () => {
     const exec = (cmd) => child_process_1.execSync(cmd, { stdio: 'inherit' });

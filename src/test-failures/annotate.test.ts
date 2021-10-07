@@ -44,10 +44,12 @@ describe('Annotate', () => {
 
   describe('getSlackMessage', () => {
     it('should create an annotation without logs link if artifact is missing', () => {
-      const annotation = getSlackMessage([mockFailure], {});
+      const annotation = getSlackMessage([mockFailure, mockFailure], {});
 
       expect(annotation).to.eql(
-        '*Test Failures*\n<https://buildkite.com/elastic/kibana-pull-request/builds/53#job-id|[job]> OSS CI Group #1 / test should fail',
+        '*Test Failures*\n' +
+          '<https://buildkite.com/elastic/kibana-pull-request/builds/53#job-id|[job]> OSS CI Group #1 / test should fail\n' +
+          '<https://buildkite.com/elastic/kibana-pull-request/builds/53#job-id|[job]> OSS CI Group #1 / test should fail',
       );
     });
 

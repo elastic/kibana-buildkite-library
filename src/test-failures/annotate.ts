@@ -112,7 +112,7 @@ export const getSlackMessage = (
 
         return `<${jobUrl}|[job]>${logsLink} ${failure.jobName} / ${failure.name}`;
       })
-      .join('<br />\n')
+      .join('\n')
   );
 };
 
