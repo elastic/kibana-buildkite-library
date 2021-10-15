@@ -7,7 +7,7 @@ class CiStatsClient {
         var _a, _b;
         this.createBuild = async () => {
             const resp = await this.http.post('/v1/build', {
-                jenkinsJobName: process.env.BUILDKITE_PIPELINE_NAME,
+                jenkinsJobName: process.env.BUILDKITE_PIPELINE_SLUG,
                 jenkinsJobId: process.env.BUILDKITE_BUILD_ID,
                 jenkinsUrl: process.env.BUILDKITE_BUILD_URL,
                 prId: process.env.GITHUB_PR_NUMBER || null,
