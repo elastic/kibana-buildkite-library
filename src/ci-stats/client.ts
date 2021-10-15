@@ -32,7 +32,7 @@ export class CiStatsClient {
   createBuild = async (): Promise<CiStatsBuild> => {
     const resp = await this.http.post('/v1/build', {
       jenkinsJobName: process.env.BUILDKITE_PIPELINE_SLUG,
-      jenkinsJobId: process.env.BUILDKITE_BUILD_ID,
+      jenkinsJobId: process.env.BUILDKITE_BUILD_NUMBER,
       jenkinsUrl: process.env.BUILDKITE_BUILD_URL,
       prId: process.env.GITHUB_PR_NUMBER || null,
     });
