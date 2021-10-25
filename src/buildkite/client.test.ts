@@ -107,5 +107,23 @@ describe('BuildkiteClient', () => {
       const result = buildkite.getJobStatus(build, job);
       expect(result.success).to.eql(true);
     });
+
+    it('returns success if job is broken but has no exit status', async () => {
+      const job = {
+        id: 'id',
+        state: 'broken',
+        type: 'script',
+        exit_status: null,
+      } as Job;
+
+      const build = {
+        id: 'id',
+        state: 'passed',
+        jobs: [job],
+      } as Build;
+
+      const result = buildkite.getJobStatus(build, job);
+      expect(result.success).to.eql(true);
+    });
   });
 });

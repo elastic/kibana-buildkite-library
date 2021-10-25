@@ -30,7 +30,7 @@ export type Job = {
   logs_url: string;
   raw_log_url: string;
   command: string;
-  exit_status: number;
+  exit_status: null | number;
   artifact_paths: string;
   artifacts_url: string;
   created_at: string;
