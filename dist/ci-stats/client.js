@@ -1,34 +1,58 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CiStatsClient = void 0;
+const promises_1 = require("timers/promises");
 const axios_1 = require("axios");
 class CiStatsClient {
     constructor(config = {}) {
         var _a, _b;
         this.createBuild = async () => {
-            const resp = await this.http.post('/v1/build', {
-                jenkinsJobName: process.env.BUILDKITE_PIPELINE_SLUG,
-                jenkinsJobId: process.env.BUILDKITE_BUILD_NUMBER,
-                jenkinsUrl: process.env.BUILDKITE_BUILD_URL,
-                prId: process.env.GITHUB_PR_NUMBER || null,
+            const resp = await this.request({
+                method: 'POST',
+                path: '/v1/build',
+                body: {
+                    jenkinsJobName: process.env.BUILDKITE_PIPELINE_SLUG,
+                    jenkinsJobId: process.env.BUILDKITE_BUILD_NUMBER,
+                    jenkinsUrl: process.env.BUILDKITE_BUILD_URL,
+                    prId: process.env.GITHUB_PR_NUMBER || null,
+                },
             });
             return resp.data;
         };
-        this.addGitInfo = (buildId) => {
-            return this.http.post(`/v1/git_info?buildId=${buildId}`, {
-                branch: (process.env.BUILDKITE_BRANCH || '').replace(/^(refs\/heads\/|origin\/)/, ''),
-                commit: process.env.BUILDKITE_COMMIT,
-                targetBranch: process.env.GITHUB_PR_TARGET_BRANCH || process.env.BUILDKITE_PULL_REQUEST_BASE_BRANCH || null,
-                mergeBase: process.env.GITHUB_PR_MERGE_BASE || null,
+        this.addGitInfo = async (buildId) => {
+            await this.request({
+                method: 'POST',
+                path: '/v1/git_info',
+                params: {
+                    buildId,
+                },
+                body: {
+                    branch: (process.env.BUILDKITE_BRANCH || '').replace(/^(refs\/heads\/|origin\/)/, ''),
+                    commit: process.env.BUILDKITE_COMMIT,
+                    targetBranch: process.env.GITHUB_PR_TARGET_BRANCH || process.env.BUILDKITE_PULL_REQUEST_BASE_BRANCH || null,
+                    mergeBase: process.env.GITHUB_PR_MERGE_BASE || null,
+                },
             });
         };
-        this.completeBuild = (buildStatus, buildId = process.env.CI_STATS_BUILD_ID) => {
-            return this.http.post(`/v1/build/_complete?id=${buildId}`, {
-                result: buildStatus,
+        this.completeBuild = async (buildStatus, buildId = process.env.CI_STATS_BUILD_ID) => {
+            await this.request({
+                method: 'POST',
+                path: `/v1/build/_complete`,
+                params: {
+                    id: buildId,
+                },
+                body: {
+                    result: buildStatus,
+                },
             });
         };
         this.getPrReport = async (buildId = process.env.CI_STATS_BUILD_ID) => {
-            const resp = await this.http.get(`v2/pr_report?buildId=${buildId}`);
+            const resp = await this.request({
+                path: `v2/pr_report`,
+                params: {
+                    buildId,
+                },
+            });
             return resp.data;
         };
         const CI_STATS_HOST = (_a = config.baseUrl) !== null && _a !== void 0 ? _a : process.env.CI_STATS_HOST;
@@ -39,6 +63,31 @@ class CiStatsClient {
                 Authorization: `token ${CI_STATS_TOKEN}`,
             },
         });
+    }
+    async request({ method, path, params, body, maxAttempts = 3 }) {
+        let attempt = 0;
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+            attempt += 1;
+            try {
+                return await this.http.request({
+                    method,
+                    url: path,
+                    params,
+                    data: body,
+                });
+            }
+            catch (error) {
+                console.error('CI Stats request error:', error);
+                if (attempt < maxAttempts) {
+                    const sec = attempt * 3;
+                    console.log('waiting', sec, 'seconds before retrying');
+                    await promises_1.setTimeout(sec * 1000);
+                    continue;
+                }
+                throw error;
+            }
+        }
     }
 }
 exports.CiStatsClient = CiStatsClient;
