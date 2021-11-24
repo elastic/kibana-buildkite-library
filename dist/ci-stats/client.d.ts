@@ -14,7 +14,8 @@ export declare class CiStatsClient {
     http: AxiosInstance;
     constructor(config?: CiStatsClientConfig);
     createBuild: () => Promise<CiStatsBuild>;
-    addGitInfo: (buildId: string) => Promise<import("axios").AxiosResponse<any>>;
-    completeBuild: (buildStatus: string, buildId?: string | undefined) => Promise<import("axios").AxiosResponse<any>>;
+    addGitInfo: (buildId: string) => Promise<void>;
+    completeBuild: (buildStatus: string, buildId?: string | undefined) => Promise<void>;
     getPrReport: (buildId?: string | undefined) => Promise<CiStatsPrReport>;
+    private request;
 }
