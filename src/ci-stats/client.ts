@@ -1,4 +1,3 @@
-import { setTimeout } from 'timers/promises';
 import axios, { AxiosInstance, Method, AxiosRequestConfig } from 'axios';
 
 export type CiStatsClientConfig = {
@@ -113,7 +112,7 @@ export class CiStatsClient {
         if (attempt < maxAttempts) {
           const sec = attempt * 3;
           console.log('waiting', sec, 'seconds before retrying');
-          await setTimeout(sec * 1000);
+          await new Promise((resolve) => setTimeout(resolve, sec * 1000));
           continue;
         }
 
