@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CiStatsClient = void 0;
-const promises_1 = require("timers/promises");
 const axios_1 = require("axios");
 class CiStatsClient {
     constructor(config = {}) {
@@ -82,7 +81,7 @@ class CiStatsClient {
                 if (attempt < maxAttempts) {
                     const sec = attempt * 3;
                     console.log('waiting', sec, 'seconds before retrying');
-                    await promises_1.setTimeout(sec * 1000);
+                    await new Promise((resolve) => setTimeout(resolve, sec * 1000));
                     continue;
                 }
                 throw error;
