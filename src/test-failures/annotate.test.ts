@@ -60,6 +60,26 @@ describe('Annotate', () => {
         '*Test Failures*\n<https://buildkite.com/elastic/kibana-pull-request/builds/53#job-id|[job]> <https://buildkite.com/organizations/elastic/pipelines/kibana-pull-request/builds/53/jobs/job-id/artifacts/artifact-id|[logs]> OSS CI Group #1 / test should fail',
       );
     });
+
+    it('should create an annotation with 1 failure count if count present', () => {
+      mockFailure.failureCount = 1;
+      mockFailure.githubIssue = 'https://github.com/some/failure/link/1234';
+      const annotation = getSlackMessage([mockFailure], mockArtifacts);
+
+      expect(annotation).to.eql(
+        '*Test Failures*\n<https://buildkite.com/elastic/kibana-pull-request/builds/53#job-id|[job]> <https://buildkite.com/organizations/elastic/pipelines/kibana-pull-request/builds/53/jobs/job-id/artifacts/artifact-id|[logs]> <https://github.com/some/failure/link/1234|[1 failure]> OSS CI Group #1 / test should fail',
+      );
+    });
+
+    it('should create an annotation with 2+ failures count if count present', () => {
+      mockFailure.failureCount = 2;
+      mockFailure.githubIssue = 'https://github.com/some/failure/link/1234';
+      const annotation = getSlackMessage([mockFailure], mockArtifacts);
+
+      expect(annotation).to.eql(
+        '*Test Failures*\n<https://buildkite.com/elastic/kibana-pull-request/builds/53#job-id|[job]> <https://buildkite.com/organizations/elastic/pipelines/kibana-pull-request/builds/53/jobs/job-id/artifacts/artifact-id|[logs]> <https://github.com/some/failure/link/1234|[2 failures]> OSS CI Group #1 / test should fail',
+      );
+    });
   });
 
   describe('getPrComment', () => {

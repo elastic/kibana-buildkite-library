@@ -19,6 +19,8 @@ export type TestFailure = {
   jobId: string;
   url: string;
   jobName: string;
+  githubIssue?: string;
+  failureCount?: number;
 };
 
 const recursiveReadDir = (dirPath: string, allFiles: string[] = []) => {
@@ -110,7 +112,14 @@ export const getSlackMessage = (
 
         const logsLink = artifactUrl ? ` <${artifactUrl}|[logs]>` : '';
 
-        return `<${jobUrl}|[job]>${logsLink} ${failure.jobName} / ${failure.name}`;
+        const failuresCount =
+          failure.failureCount && failure.githubIssue
+            ? ` <${failure.githubIssue}|[${failure.failureCount} failure${
+                failure.failureCount > 1 ? 's' : ''
+              }]>`
+            : '';
+
+        return `<${jobUrl}|[job]>${logsLink}${failuresCount} ${failure.jobName} / ${failure.name}`;
       })
       .join('\n')
   );

@@ -12,6 +12,8 @@ export declare type TestFailure = {
     jobId: string;
     url: string;
     jobName: string;
+    githubIssue?: string;
+    failureCount?: number;
 };
 export declare const getAnnotation: (failures: TestFailure[], failureHtmlArtifacts: Record<string, Artifact>) => string;
 export declare const getPrComment: (failures: TestFailure[], failureHtmlArtifacts: Record<string, Artifact>) => string;

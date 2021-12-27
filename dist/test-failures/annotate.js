@@ -57,7 +57,10 @@ exports.getSlackMessage = (failures, failureHtmlArtifacts) => {
                 ? `${failure.url.replace('https://buildkite.com/elastic', 'https://buildkite.com/organizations/elastic/pipelines')}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[lookup].id}`
                 : '';
             const logsLink = artifactUrl ? ` <${artifactUrl}|[logs]>` : '';
-            return `<${jobUrl}|[job]>${logsLink} ${failure.jobName} / ${failure.name}`;
+            const failuresCount = failure.failureCount && failure.githubIssue
+                ? ` <${failure.githubIssue}|[${failure.failureCount} failure${failure.failureCount > 1 ? 's' : ''}]>`
+                : '';
+            return `<${jobUrl}|[job]>${logsLink}${failuresCount} ${failure.jobName} / ${failure.name}`;
         })
             .join('\n'));
 };
