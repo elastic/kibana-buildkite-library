@@ -15,7 +15,8 @@ export declare class CiStatsClient {
     constructor(config?: CiStatsClientConfig);
     createBuild: () => Promise<CiStatsBuild>;
     addGitInfo: (buildId: string) => Promise<void>;
-    completeBuild: (buildStatus: string, buildId?: string | undefined) => Promise<void>;
-    getPrReport: (buildId?: string | undefined) => Promise<CiStatsPrReport>;
+    markBuildAsValidBaseline: (buildId: string) => Promise<void>;
+    completeBuild: (buildStatus: string, buildId: string) => Promise<void>;
+    getPrReport: (buildId: string) => Promise<CiStatsPrReport>;
     private request;
 }

@@ -69,7 +69,17 @@ export class CiStatsClient {
     });
   };
 
-  completeBuild = async (buildStatus: string, buildId = process.env.CI_STATS_BUILD_ID) => {
+  markBuildAsValidBaseline = async (buildId: string) => {
+    await this.request({
+      method: 'POST',
+      path: `/v1/build/_is_valid_baseline`,
+      params: {
+        id: buildId,
+      },
+    });
+  };
+
+  completeBuild = async (buildStatus: string, buildId: string) => {
     await this.request({
       method: 'POST',
       path: `/v1/build/_complete`,
@@ -82,7 +92,7 @@ export class CiStatsClient {
     });
   };
 
-  getPrReport = async (buildId = process.env.CI_STATS_BUILD_ID) => {
+  getPrReport = async (buildId: string) => {
     const resp = await this.request<CiStatsPrReport>({
       path: `v2/pr_report`,
       params: {
