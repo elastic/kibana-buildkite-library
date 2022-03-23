@@ -1,3 +1,4 @@
+import { Agent } from './agent';
 export declare type JobState = 'pending' | 'waiting' | 'waiting_failed' | 'blocked' | 'blocked_failed' | 'unblocked' | 'unblocked_failed' | 'limiting' | 'limited' | 'scheduled' | 'assigned' | 'accepted' | 'running' | 'passed' | 'failed' | 'canceling' | 'canceled' | 'timing_out' | 'timed_out' | 'skipped' | 'broken';
 export declare type Job = {
     id: string;
@@ -16,7 +17,7 @@ export declare type Job = {
     runnable_at: string;
     started_at: string;
     finished_at: string;
-    agent: {};
+    agent: Agent;
     agent_query_rules: string[];
     web_url: string;
     retried: boolean;

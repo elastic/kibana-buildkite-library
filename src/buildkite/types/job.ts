@@ -1,3 +1,5 @@
+import { Agent } from './agent';
+
 export type JobState =
   | 'pending'
   | 'waiting'
@@ -38,7 +40,7 @@ export type Job = {
   runnable_at: string;
   started_at: string;
   finished_at: string;
-  agent: {};
+  agent: Agent;
   agent_query_rules: string[];
   web_url: string;
   retried: boolean;
