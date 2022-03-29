@@ -17,6 +17,7 @@ export type BuildStatus = {
   state: BuildState;
   success: boolean;
   hasRetries: boolean;
+  hasNonPreemptionRetries: boolean;
 };
 
 export type Build = {

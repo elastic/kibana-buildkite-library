@@ -50,11 +50,16 @@ class BuildkiteClient {
             };
         };
         this.getBuildStatus = (build) => {
+            var _a, _b;
             let hasRetries = false;
+            let hasNonPreemptionRetries = false;
             let success = true;
             for (const job of build.jobs) {
                 if (job.retried) {
                     hasRetries = true;
+                    if (job.state !== 'failed' || !((_b = (_a = job.agent) === null || _a === void 0 ? void 0 : _a.meta_data) === null || _b === void 0 ? void 0 : _b.includes('spot=true'))) {
+                        hasNonPreemptionRetries = true;
+                    }
                 }
                 const state = this.getJobStatus(build, job);
                 success = success && state.success;
@@ -63,6 +68,7 @@ class BuildkiteClient {
                 state: build.state,
                 success,
                 hasRetries,
+                hasNonPreemptionRetries,
             };
         };
         this.getCurrentBuildStatus = async (includeRetriedJobs = false) => {

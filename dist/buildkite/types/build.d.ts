@@ -5,6 +5,7 @@ export declare type BuildStatus = {
     state: BuildState;
     success: boolean;
     hasRetries: boolean;
+    hasNonPreemptionRetries: boolean;
 };
 export declare type Build = {
     id: string;

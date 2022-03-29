@@ -97,11 +97,16 @@ export class BuildkiteClient {
 
   getBuildStatus = (build: Build): BuildStatus => {
     let hasRetries = false;
+    let hasNonPreemptionRetries = false;
     let success = true;
 
     for (const job of build.jobs) {
       if (job.retried) {
         hasRetries = true;
+
+        if (job.state !== 'failed' || !job.agent?.meta_data?.includes('spot=true')) {
+          hasNonPreemptionRetries = true;
+        }
       }
 
       const state = this.getJobStatus(build, job);
@@ -112,6 +117,7 @@ export class BuildkiteClient {
       state: build.state,
       success,
       hasRetries,
+      hasNonPreemptionRetries,
     };
   };
 
