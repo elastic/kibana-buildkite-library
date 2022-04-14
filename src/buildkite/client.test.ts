@@ -10,6 +10,104 @@ describe('BuildkiteClient', () => {
     buildkite = new BuildkiteClient();
   });
 
+  describe('getBuildStatus', () => {
+    it('does not have hasNonPreemptionRetries for preemption retries', async () => {
+      const job: Job = {
+        id: 'id-1',
+        retried_in_job_id: 'id-2',
+        state: 'failed',
+        agent: {
+          meta_data: ['spot=true'],
+        },
+        retried: true,
+        exit_status: -1,
+        type: 'script',
+      } as Job;
+
+      const retry: Job = {
+        id: 'id-2',
+        state: 'passed',
+        agent: {
+          meta_data: ['spot=true'],
+        },
+        type: 'script',
+      } as Job;
+
+      const build = {
+        id: 'id',
+        state: 'passed',
+        jobs: [job, retry],
+      } as Build;
+
+      const buildStatus = buildkite.getBuildStatus(build);
+      expect(buildStatus.success).to.eql(true);
+      expect(buildStatus.hasRetries).to.eql(true);
+      expect(buildStatus.hasNonPreemptionRetries).to.eql(false);
+    });
+
+    it('has hasNonPreemptionRetries for spot non-preemption retries', async () => {
+      const job: Job = {
+        id: 'id-1',
+        retried_in_job_id: 'id-2',
+        state: 'failed',
+        agent: {
+          meta_data: ['spot=true'],
+        },
+        retried: true,
+        exit_status: 1,
+        type: 'script',
+      } as Job;
+
+      const retry: Job = {
+        id: 'id-2',
+        state: 'passed',
+        agent: {
+          meta_data: ['spot=true'],
+        },
+        type: 'script',
+      } as Job;
+
+      const build = {
+        id: 'id',
+        state: 'passed',
+        jobs: [job, retry],
+      } as Build;
+
+      const buildStatus = buildkite.getBuildStatus(build);
+      expect(buildStatus.success).to.eql(true);
+      expect(buildStatus.hasRetries).to.eql(true);
+      expect(buildStatus.hasNonPreemptionRetries).to.eql(true);
+    });
+
+    it('has hasNonPreemptionRetries for non-spot retries with exit code -1', async () => {
+      const job: Job = {
+        id: 'id-1',
+        retried_in_job_id: 'id-2',
+        state: 'failed',
+        retried: true,
+        exit_status: -1,
+        type: 'script',
+      } as Job;
+
+      const retry: Job = {
+        id: 'id-2',
+        state: 'passed',
+        type: 'script',
+      } as Job;
+
+      const build = {
+        id: 'id',
+        state: 'passed',
+        jobs: [job, retry],
+      } as Build;
+
+      const buildStatus = buildkite.getBuildStatus(build);
+      expect(buildStatus.success).to.eql(true);
+      expect(buildStatus.hasRetries).to.eql(true);
+      expect(buildStatus.hasNonPreemptionRetries).to.eql(true);
+    });
+  });
+
   describe('getJobStatus', () => {
     it('returns success if job is successful', async () => {
       const job = {

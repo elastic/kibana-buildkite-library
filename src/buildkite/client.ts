@@ -103,8 +103,10 @@ export class BuildkiteClient {
     for (const job of build.jobs) {
       if (job.retried) {
         hasRetries = true;
+        const isPreemptionFailure =
+          job.state === 'failed' && job.agent?.meta_data?.includes('spot=true') && job.exit_status === -1;
 
-        if (job.state !== 'failed' || !job.agent?.meta_data?.includes('spot=true')) {
+        if (!isPreemptionFailure) {
           hasNonPreemptionRetries = true;
         }
       }
