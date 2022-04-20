@@ -42,7 +42,17 @@ class BuildkiteClient {
             else {
                 // "Manual" steps are for input, when they are skipped, they have state: broken in the API
                 // So let's always mark them as successful, they can't really fail
-                success = job.type === 'manual' || !['failed', 'timed_out', 'timing_out', 'broken'].includes(job.state);
+                success =
+                    job.type === 'manual' ||
+                        ![
+                            'failed',
+                            'timed_out',
+                            'timing_out',
+                            'broken',
+                            'waiting_failed',
+                            'unblocked_failed',
+                            'blocked_failed',
+                        ].includes(job.state);
             }
             return {
                 success,
@@ -53,7 +63,7 @@ class BuildkiteClient {
             var _a, _b;
             let hasRetries = false;
             let hasNonPreemptionRetries = false;
-            let success = true;
+            let success = build.state !== 'failed';
             for (const job of build.jobs) {
                 if (job.retried) {
                     hasRetries = true;

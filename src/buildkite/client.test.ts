@@ -106,6 +106,22 @@ describe('BuildkiteClient', () => {
       expect(buildStatus.hasRetries).to.eql(true);
       expect(buildStatus.hasNonPreemptionRetries).to.eql(true);
     });
+
+    it('returns failure if build is failed and all jobs passed', async () => {
+      const job = {
+        id: 'id_1',
+        state: 'passed',
+      } as Job;
+
+      const build = {
+        id: 'id',
+        state: 'failed',
+        jobs: [job],
+      } as Build;
+
+      const result = buildkite.getBuildStatus(build);
+      expect(result.success).to.eql(false);
+    });
   });
 
   describe('getJobStatus', () => {
@@ -183,6 +199,22 @@ describe('BuildkiteClient', () => {
         id: 'id',
         state: 'failed',
         jobs: [job, jobRetry],
+      } as Build;
+
+      const result = buildkite.getJobStatus(build, job);
+      expect(result.success).to.eql(false);
+    });
+
+    it('returns failure if job is waiting_failed', async () => {
+      const job = {
+        id: 'id_1',
+        state: 'waiting_failed',
+      } as Job;
+
+      const build = {
+        id: 'id',
+        state: 'failed',
+        jobs: [job],
       } as Build;
 
       const result = buildkite.getJobStatus(build, job);
