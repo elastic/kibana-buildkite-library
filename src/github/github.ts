@@ -15,14 +15,14 @@ export const getPrChanges = async (
     throw "Couldn't retrieve Github PR info from environment variables in order to retrieve PR changes";
   }
 
-  const files = await github.pulls.listFiles({
+  const files = await github.paginate(github.pulls.listFiles, {
     owner,
     repo,
     pull_number: typeof prNumber === 'number' ? prNumber : parseInt(prNumber),
     per_page: 100,
   });
 
-  return files.data;
+  return files;
 };
 
 export const getPrChangesCached = async () => {

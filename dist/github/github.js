@@ -10,13 +10,13 @@ exports.getPrChanges = async (owner = process.env.GITHUB_PR_BASE_OWNER, repo = p
     if (!owner || !repo || !prNumber) {
         throw "Couldn't retrieve Github PR info from environment variables in order to retrieve PR changes";
     }
-    const files = await github.pulls.listFiles({
+    const files = await github.paginate(github.pulls.listFiles, {
         owner,
         repo,
         pull_number: typeof prNumber === 'number' ? prNumber : parseInt(prNumber),
         per_page: 100,
     });
-    return files.data;
+    return files;
 };
 exports.getPrChangesCached = async () => {
     prChangesCache = prChangesCache || (await exports.getPrChanges());
