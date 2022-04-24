@@ -145,7 +145,7 @@ export class CiStatsClient {
       url: '/v1/_pick_test_group_run_order',
       data: {
         branch: trackedBranch,
-        jobName: process.env.BUILDKITE_PIPELINE_SLUG,
+        jobName: 'kibana-on-merge',
         targetDurationMin: 40,
         maxDurationMin: 45,
         groups: [
