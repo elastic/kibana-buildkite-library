@@ -10,6 +10,35 @@ export declare type CiStatsPrReport = {
     md: string;
     success: boolean;
 };
+export interface CompleteSuccessBuildSource {
+    jobName: string;
+    jobRunner: string;
+    completedAt: string;
+    commit: string;
+    startedAt: string;
+    branch: string;
+    result: 'SUCCESS';
+    jobId: string;
+    targetBranch: string | null;
+    fromKibanaCiProduction: boolean;
+    requiresValidMetrics: boolean | null;
+    jobUrl: string;
+    mergeBase: string | null;
+}
+export interface TestGroupRunOrderResponse {
+    /** The Kibana branch to get stats for, eg "main" */
+    latestBuild: CompleteSuccessBuildSource;
+    /** The CI job names to filter builds by, eg "kibana-hourly" */
+    types: Array<{
+        type: string;
+        count: number;
+        groups: Array<{
+            durationMin: number;
+            names: string[];
+        }>;
+        namesWithoutDurations: string[];
+    }>;
+}
 export declare class CiStatsClient {
     http: AxiosInstance;
     constructor(config?: CiStatsClientConfig);
@@ -18,5 +47,6 @@ export declare class CiStatsClient {
     markBuildAsValidBaseline: (buildId: string) => Promise<void>;
     completeBuild: (buildStatus: string, buildId: string) => Promise<void>;
     getPrReport: (buildId: string) => Promise<CiStatsPrReport>;
+    pickJestConfigRunOrder: (trackedBranch: string, unitConfigs: string[], integrationConfigs: string[]) => Promise<TestGroupRunOrderResponse>;
     private request;
 }

@@ -14,6 +14,37 @@ export type CiStatsPrReport = {
   success: boolean;
 };
 
+export interface CompleteSuccessBuildSource {
+  jobName: string;
+  jobRunner: string;
+  completedAt: string;
+  commit: string;
+  startedAt: string;
+  branch: string;
+  result: 'SUCCESS';
+  jobId: string;
+  targetBranch: string | null;
+  fromKibanaCiProduction: boolean;
+  requiresValidMetrics: boolean | null;
+  jobUrl: string;
+  mergeBase: string | null;
+}
+
+export interface TestGroupRunOrderResponse {
+  /** The Kibana branch to get stats for, eg "main" */
+  latestBuild: CompleteSuccessBuildSource;
+  /** The CI job names to filter builds by, eg "kibana-hourly" */
+  types: Array<{
+    type: string;
+    count: number;
+    groups: Array<{
+      durationMin: number;
+      names: string[];
+    }>;
+    namesWithoutDurations: string[];
+  }>;
+}
+
 interface RequestOptions {
   path: string;
   method?: Method;
@@ -97,6 +128,37 @@ export class CiStatsClient {
       path: `v2/pr_report`,
       params: {
         buildId,
+      },
+    });
+
+    return resp.data;
+  };
+
+  pickJestConfigRunOrder = async (
+    trackedBranch: string,
+    unitConfigs: string[],
+    integrationConfigs: string[],
+  ) => {
+    const resp = await this.request<TestGroupRunOrderResponse>({
+      method: 'POST',
+      path: 'v1/_pick_test_group_run_order',
+      body: {
+        branch: trackedBranch,
+        jobName: process.env.BUILDKITE_PIPELINE_SLUG,
+        targetDurationMin: 40,
+        maxDurationMin: 45,
+        groups: [
+          {
+            type: 'Jest Unit Tests',
+            defaultDurationMin: 3,
+            names: unitConfigs,
+          },
+          {
+            type: 'Jest Integration Tests',
+            defaultDurationMin: 10,
+            names: integrationConfigs,
+          },
+        ],
       },
     });
 

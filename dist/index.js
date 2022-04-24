@@ -12,6 +12,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./buildkite"), exports);
 exports.CiStats = require("./ci-stats");
+__exportStar(require("./pick_jest_config_run_order"), exports);
 __exportStar(require("./github"), exports);
 exports.TestFailures = require("./test-failures");
 //# sourceMappingURL=index.js.map
