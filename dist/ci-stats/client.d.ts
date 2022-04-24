@@ -1,4 +1,3 @@
-import { AxiosInstance } from 'axios';
 export declare type CiStatsClientConfig = {
     baseUrl?: string;
     token?: string;
@@ -40,7 +39,8 @@ export interface TestGroupRunOrderResponse {
     }>;
 }
 export declare class CiStatsClient {
-    http: AxiosInstance;
+    private readonly baseUrl;
+    private readonly defaultHeaders;
     constructor(config?: CiStatsClientConfig);
     createBuild: () => Promise<CiStatsBuild>;
     addGitInfo: (buildId: string) => Promise<void>;

@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, Method, AxiosRequestConfig } from 'axios';
+import axios, { Method, AxiosRequestConfig } from 'axios';
 
 export type CiStatsClientConfig = {
   baseUrl?: string;
@@ -54,18 +54,17 @@ interface RequestOptions {
 }
 
 export class CiStatsClient {
-  http: AxiosInstance;
+  private readonly baseUrl: string;
+  private readonly defaultHeaders: Record<string, string>;
 
   constructor(config: CiStatsClientConfig = {}) {
     const CI_STATS_HOST = config.baseUrl ?? process.env.CI_STATS_HOST;
     const CI_STATS_TOKEN = config.token ?? process.env.CI_STATS_TOKEN;
 
-    this.http = axios.create({
-      baseURL: `https://${CI_STATS_HOST}`,
-      headers: {
-        Authorization: `token ${CI_STATS_TOKEN}`,
-      },
-    });
+    this.baseUrl = `https://${CI_STATS_HOST}`;
+    this.defaultHeaders = {
+      Authorization: `token ${CI_STATS_TOKEN}`,
+    };
   }
 
   createBuild = async () => {
@@ -139,10 +138,12 @@ export class CiStatsClient {
     unitConfigs: string[],
     integrationConfigs: string[],
   ) => {
-    const resp = await this.request<TestGroupRunOrderResponse>({
+    const resp = await axios.request<TestGroupRunOrderResponse>({
       method: 'POST',
-      path: 'v1/_pick_test_group_run_order',
-      body: {
+      baseURL: this.baseUrl,
+      headers: this.defaultHeaders,
+      url: '/v1/_pick_test_group_run_order',
+      data: {
         branch: trackedBranch,
         jobName: process.env.BUILDKITE_PIPELINE_SLUG,
         targetDurationMin: 40,
@@ -172,11 +173,13 @@ export class CiStatsClient {
     while (true) {
       attempt += 1;
       try {
-        return await this.http.request<T>({
+        return await axios.request<T>({
           method,
+          baseURL: this.baseUrl,
           url: path,
           params,
           data: body,
+          headers: this.defaultHeaders,
         });
       } catch (error) {
         console.error('CI Stats request error:', error);

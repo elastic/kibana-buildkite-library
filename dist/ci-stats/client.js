@@ -64,10 +64,12 @@ class CiStatsClient {
             return resp.data;
         };
         this.pickJestConfigRunOrder = async (trackedBranch, unitConfigs, integrationConfigs) => {
-            const resp = await this.request({
+            const resp = await axios_1.default.request({
                 method: 'POST',
-                path: 'v1/_pick_test_group_run_order',
-                body: {
+                baseURL: this.baseUrl,
+                headers: this.defaultHeaders,
+                url: '/v1/_pick_test_group_run_order',
+                data: {
                     branch: trackedBranch,
                     jobName: process.env.BUILDKITE_PIPELINE_SLUG,
                     targetDurationMin: 40,
@@ -90,12 +92,10 @@ class CiStatsClient {
         };
         const CI_STATS_HOST = (_a = config.baseUrl) !== null && _a !== void 0 ? _a : process.env.CI_STATS_HOST;
         const CI_STATS_TOKEN = (_b = config.token) !== null && _b !== void 0 ? _b : process.env.CI_STATS_TOKEN;
-        this.http = axios_1.default.create({
-            baseURL: `https://${CI_STATS_HOST}`,
-            headers: {
-                Authorization: `token ${CI_STATS_TOKEN}`,
-            },
-        });
+        this.baseUrl = `https://${CI_STATS_HOST}`;
+        this.defaultHeaders = {
+            Authorization: `token ${CI_STATS_TOKEN}`,
+        };
     }
     async request({ method, path, params, body, maxAttempts = 3 }) {
         let attempt = 0;
@@ -103,11 +103,13 @@ class CiStatsClient {
         while (true) {
             attempt += 1;
             try {
-                return await this.http.request({
+                return await axios_1.default.request({
                     method,
+                    baseURL: this.baseUrl,
                     url: path,
                     params,
                     data: body,
+                    headers: this.defaultHeaders,
                 });
             }
             catch (error) {
