@@ -10,6 +10,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BuildkiteClient = void 0;
 const axios_1 = require("axios");
 const child_process_1 = require("child_process");
+const js_yaml_1 = require("js-yaml");
 const parse_link_header_1 = require("./parse_link_header");
 class BuildkiteClient {
     constructor(config = {}) {
@@ -120,6 +121,17 @@ class BuildkiteClient {
         this.setAnnotation = (context, style, value) => {
             child_process_1.execSync(`buildkite-agent annotate --context '${context}' --style '${style}'`, {
                 input: value,
+                stdio: ['pipe', 'inherit', 'inherit'],
+            });
+        };
+        this.uploadArtifacts = (pattern) => {
+            child_process_1.execSync(`buildkite-agent artifact upload '${pattern}'`, {
+                stdio: ['ignore', 'inherit', 'inherit'],
+            });
+        };
+        this.uploadSteps = (steps) => {
+            child_process_1.execSync(`buildkite-agent pipeline upload`, {
+                input: js_yaml_1.dump({ steps }),
                 stdio: ['pipe', 'inherit', 'inherit'],
             });
         };

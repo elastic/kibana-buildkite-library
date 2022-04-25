@@ -8,6 +8,7 @@
 
 import axios, { AxiosInstance } from 'axios';
 import { execSync } from 'child_process';
+import { dump } from 'js-yaml';
 import parseLinkHeader from './parse_link_header';
 import { Artifact } from './types/artifact';
 import { Build, BuildStatus } from './types/build';
@@ -16,6 +17,23 @@ import { Job, JobState } from './types/job';
 export type BuildkiteClientConfig = {
   baseUrl?: string;
   token?: string;
+};
+
+export type BuildkiteStep = {
+  command: string;
+  label: string;
+  parallelism?: number;
+  agents: {
+    queue: string;
+  };
+  timeout_in_minutes?: number;
+  key: string;
+  retry?: {
+    automatic: Array<{
+      exit_status: string;
+      limit: number;
+    }>;
+  };
 };
 
 export class BuildkiteClient {
@@ -181,6 +199,19 @@ export class BuildkiteClient {
   setAnnotation = (context: string, style: 'info' | 'success' | 'warning' | 'error', value: string) => {
     execSync(`buildkite-agent annotate --context '${context}' --style '${style}'`, {
       input: value,
+      stdio: ['pipe', 'inherit', 'inherit'],
+    });
+  };
+
+  uploadArtifacts = (pattern: string) => {
+    execSync(`buildkite-agent artifact upload '${pattern}'`, {
+      stdio: ['ignore', 'inherit', 'inherit'],
+    });
+  };
+
+  uploadSteps = (steps: BuildkiteStep[]) => {
+    execSync(`buildkite-agent pipeline upload`, {
+      input: dump({ steps }),
       stdio: ['pipe', 'inherit', 'inherit'],
     });
   };

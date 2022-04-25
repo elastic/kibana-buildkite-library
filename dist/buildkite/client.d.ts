@@ -6,6 +6,22 @@ export declare type BuildkiteClientConfig = {
     baseUrl?: string;
     token?: string;
 };
+export declare type BuildkiteStep = {
+    command: string;
+    label: string;
+    parallelism?: number;
+    agents: {
+        queue: string;
+    };
+    timeout_in_minutes?: number;
+    key: string;
+    retry?: {
+        automatic: Array<{
+            exit_status: string;
+            limit: number;
+        }>;
+    };
+};
 export declare class BuildkiteClient {
     http: AxiosInstance;
     constructor(config?: BuildkiteClientConfig);
@@ -21,4 +37,6 @@ export declare class BuildkiteClient {
     getArtifactsForCurrentBuild: () => Promise<Artifact[]>;
     setMetadata: (key: string, value: string) => void;
     setAnnotation: (context: string, style: 'info' | 'success' | 'warning' | 'error', value: string) => void;
+    uploadArtifacts: (pattern: string) => void;
+    uploadSteps: (steps: BuildkiteStep[]) => void;
 }
