@@ -1,5 +1,4 @@
 import * as Fs from 'fs';
-import { inspect } from 'util';
 
 import * as globby from 'globby';
 
@@ -75,9 +74,21 @@ export async function pickJestConfigRunOrder() {
     },
   );
 
-  const { latestBuild, types } = await ciStats.pickTestGroupRunOrder({
-    branch: getTrackedBranch(),
-    jobName: 'kibana-on-merge',
+  const { sourceBuild, types } = await ciStats.pickTestGroupRunOrder({
+    sources: [
+      ...(process.env.GITHUB_PR_NUMBER
+        ? [
+            {
+              prId: process.env.GITHUB_PR_NUMBER,
+              jobName: 'kibana-pull-request',
+            },
+          ]
+        : []),
+      {
+        branch: getTrackedBranch(),
+        jobName: 'kibana-on-merge',
+      },
+    ],
     targetDurationMin: 40,
     maxDurationMin: 45,
     groups: [
@@ -94,7 +105,9 @@ export async function pickJestConfigRunOrder() {
     ],
   });
 
-  process.stderr.write(`test run order is determined by build:\n${inspect(latestBuild)}\n`);
+  console.log('test run order is determined by build:');
+  console.dir(sourceBuild, { depth: Infinity });
+
   const unit = getRunGroup(bk, types, unitType);
   const integration = getRunGroup(bk, types, integrationType);
 

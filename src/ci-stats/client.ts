@@ -32,7 +32,7 @@ export interface CompleteSuccessBuildSource {
 
 export interface TestGroupRunOrderResponse {
   /** The Kibana branch to get stats for, eg "main" */
-  latestBuild: CompleteSuccessBuildSource;
+  sourceBuild: CompleteSuccessBuildSource;
   /** The CI job names to filter builds by, eg "kibana-hourly" */
   types: Array<{
     type: string;
@@ -134,8 +134,16 @@ export class CiStatsClient {
   };
 
   pickTestGroupRunOrder = async (body: {
-    branch: string;
-    jobName: string;
+    sources: Array<
+      | {
+          branch: string;
+          jobName: string;
+        }
+      | {
+          prId: string;
+          jobName: string;
+        }
+    >;
     targetDurationMin: number;
     maxDurationMin: number;
     groups: Array<{

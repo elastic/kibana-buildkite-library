@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.pickJestConfigRunOrder = void 0;
 const Fs = require("fs");
-const util_1 = require("util");
 const globby = require("globby");
 const buildkite_1 = require("../buildkite");
 const client_1 = require("./client");
@@ -58,9 +57,21 @@ async function pickJestConfigRunOrder() {
         cwd: process.cwd(),
         absolute: false,
     });
-    const { latestBuild, types } = await ciStats.pickTestGroupRunOrder({
-        branch: getTrackedBranch(),
-        jobName: 'kibana-on-merge',
+    const { sourceBuild, types } = await ciStats.pickTestGroupRunOrder({
+        sources: [
+            ...(process.env.GITHUB_PR_NUMBER
+                ? [
+                    {
+                        prId: process.env.GITHUB_PR_NUMBER,
+                        jobName: 'kibana-pull-request',
+                    },
+                ]
+                : []),
+            {
+                branch: getTrackedBranch(),
+                jobName: 'kibana-on-merge',
+            },
+        ],
         targetDurationMin: 40,
         maxDurationMin: 45,
         groups: [
@@ -76,7 +87,8 @@ async function pickJestConfigRunOrder() {
             },
         ],
     });
-    process.stderr.write(`test run order is determined by build:\n${util_1.inspect(latestBuild)}\n`);
+    console.log('test run order is determined by build:');
+    console.dir(sourceBuild, { depth: Infinity });
     const unit = getRunGroup(bk, types, unitType);
     const integration = getRunGroup(bk, types, integrationType);
     // write the config for each step to an artifact that can be used by the individual jest jobs
