@@ -143,6 +143,10 @@ export class CiStatsClient {
           prId: string;
           jobName: string;
         }
+      | {
+          commit: string;
+          jobName: string;
+        }
     >;
     targetDurationMin: number;
     maxDurationMin: number;

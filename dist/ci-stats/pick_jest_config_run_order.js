@@ -59,6 +59,7 @@ async function pickJestConfigRunOrder() {
     });
     const { sourceBuild, types } = await ciStats.pickTestGroupRunOrder({
         sources: [
+            // try to get times from a recent successful job on this PR
             ...(process.env.GITHUB_PR_NUMBER
                 ? [
                     {
@@ -67,6 +68,16 @@ async function pickJestConfigRunOrder() {
                     },
                 ]
                 : []),
+            // try to get times from the mergeBase commit
+            ...(process.env.GITHUB_PR_MERGE_BASE
+                ? [
+                    {
+                        commit: process.env.GITHUB_PR_MERGE_BASE,
+                        jobName: 'kibana-on-merge',
+                    },
+                ]
+                : []),
+            // fallback to the latest times from the tracked branch
             {
                 branch: getTrackedBranch(),
                 jobName: 'kibana-on-merge',
