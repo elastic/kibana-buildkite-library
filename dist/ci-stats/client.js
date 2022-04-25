@@ -63,30 +63,13 @@ class CiStatsClient {
             });
             return resp.data;
         };
-        this.pickJestConfigRunOrder = async (trackedBranch, unitConfigs, integrationConfigs) => {
+        this.pickTestGroupRunOrder = async (body) => {
             const resp = await axios_1.default.request({
                 method: 'POST',
                 baseURL: this.baseUrl,
                 headers: this.defaultHeaders,
                 url: '/v1/_pick_test_group_run_order',
-                data: {
-                    branch: trackedBranch,
-                    jobName: 'kibana-on-merge',
-                    targetDurationMin: 40,
-                    maxDurationMin: 45,
-                    groups: [
-                        {
-                            type: 'Jest Unit Tests',
-                            defaultDurationMin: 3,
-                            names: unitConfigs,
-                        },
-                        {
-                            type: 'Jest Integration Tests',
-                            defaultDurationMin: 10,
-                            names: integrationConfigs,
-                        },
-                    ],
-                },
+                data: body,
             });
             return resp.data;
         };

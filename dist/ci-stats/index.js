@@ -14,4 +14,5 @@ __exportStar(require("./client"), exports);
 __exportStar(require("./on_complete"), exports);
 __exportStar(require("./on_metrics_viable"), exports);
 __exportStar(require("./on_start"), exports);
+__exportStar(require("./pick_jest_config_run_order"), exports);
 //# sourceMappingURL=index.js.map

@@ -47,6 +47,16 @@ export declare class CiStatsClient {
     markBuildAsValidBaseline: (buildId: string) => Promise<void>;
     completeBuild: (buildStatus: string, buildId: string) => Promise<void>;
     getPrReport: (buildId: string) => Promise<CiStatsPrReport>;
-    pickJestConfigRunOrder: (trackedBranch: string, unitConfigs: string[], integrationConfigs: string[]) => Promise<TestGroupRunOrderResponse>;
+    pickTestGroupRunOrder: (body: {
+        branch: string;
+        jobName: string;
+        targetDurationMin: number;
+        maxDurationMin: number;
+        groups: Array<{
+            type: string;
+            defaultDurationMin?: number;
+            names: string[];
+        }>;
+    }) => Promise<TestGroupRunOrderResponse>;
     private request;
 }
