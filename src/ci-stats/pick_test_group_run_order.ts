@@ -55,7 +55,7 @@ function getTrackedBranch(): string {
   return branch;
 }
 
-export async function pickJestConfigRunOrder() {
+export async function pickTestGroupRunOrder() {
   const bk = new BuildkiteClient();
   const ciStats = new CiStatsClient();
 
@@ -66,7 +66,7 @@ export async function pickJestConfigRunOrder() {
     throw new Error('missing jest test group type environment variables');
   }
 
-  const configFiles = globby.sync(
+  const jestFiles = globby.sync(
     ['**/jest.config.js', '**/jest.integration.config.js', '!**/__fixtures__/**'],
     {
       cwd: process.cwd(),
@@ -100,18 +100,20 @@ export async function pickJestConfigRunOrder() {
         jobName: 'kibana-on-merge',
       },
     ],
-    targetDurationMin: 40,
-    maxDurationMin: 45,
     groups: [
       {
         type: unitType,
-        defaultDurationMin: 3,
-        names: configFiles.filter((p) => p.endsWith('jest.config.js')),
+        defaultMin: 3,
+        targetMin: 40,
+        maxMin: 45,
+        names: jestFiles.filter((p) => p.endsWith('jest.config.js')),
       },
       {
         type: integrationType,
-        defaultDurationMin: 10,
-        names: configFiles.filter((p) => p.endsWith('jest.integration.config.js')),
+        defaultMin: 10,
+        targetMin: 40,
+        maxMin: 45,
+        names: jestFiles.filter((p) => p.endsWith('jest.integration.config.js')),
       },
     ],
   });

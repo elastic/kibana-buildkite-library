@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.pickJestConfigRunOrder = void 0;
+exports.pickTestGroupRunOrder = void 0;
 const Fs = require("fs");
 const globby = require("globby");
 const buildkite_1 = require("../buildkite");
@@ -44,7 +44,7 @@ function getTrackedBranch() {
     }
     return branch;
 }
-async function pickJestConfigRunOrder() {
+async function pickTestGroupRunOrder() {
     const bk = new buildkite_1.BuildkiteClient();
     const ciStats = new client_1.CiStatsClient();
     // these keys are synchronized in a few placed by storing them in the env during builds
@@ -53,7 +53,7 @@ async function pickJestConfigRunOrder() {
     if (!unitType || !integrationType) {
         throw new Error('missing jest test group type environment variables');
     }
-    const configFiles = globby.sync(['**/jest.config.js', '**/jest.integration.config.js', '!**/__fixtures__/**'], {
+    const jestFiles = globby.sync(['**/jest.config.js', '**/jest.integration.config.js', '!**/__fixtures__/**'], {
         cwd: process.cwd(),
         absolute: false,
     });
@@ -83,18 +83,20 @@ async function pickJestConfigRunOrder() {
                 jobName: 'kibana-on-merge',
             },
         ],
-        targetDurationMin: 40,
-        maxDurationMin: 45,
         groups: [
             {
                 type: unitType,
-                defaultDurationMin: 3,
-                names: configFiles.filter((p) => p.endsWith('jest.config.js')),
+                defaultMin: 3,
+                targetMin: 40,
+                maxMin: 45,
+                names: jestFiles.filter((p) => p.endsWith('jest.config.js')),
             },
             {
                 type: integrationType,
-                defaultDurationMin: 10,
-                names: configFiles.filter((p) => p.endsWith('jest.integration.config.js')),
+                defaultMin: 10,
+                targetMin: 40,
+                maxMin: 45,
+                names: jestFiles.filter((p) => p.endsWith('jest.integration.config.js')),
             },
         ],
     });
@@ -145,5 +147,5 @@ async function pickJestConfigRunOrder() {
         },
     ]);
 }
-exports.pickJestConfigRunOrder = pickJestConfigRunOrder;
-//# sourceMappingURL=pick_jest_config_run_order.js.map
+exports.pickTestGroupRunOrder = pickTestGroupRunOrder;
+//# sourceMappingURL=pick_test_group_run_order.js.map

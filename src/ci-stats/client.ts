@@ -148,11 +148,11 @@ export class CiStatsClient {
           jobName: string;
         }
     >;
-    targetDurationMin: number;
-    maxDurationMin: number;
     groups: Array<{
       type: string;
-      defaultDurationMin?: number;
+      defaultMin?: number;
+      targetMin: number;
+      maxMin: number;
       names: string[];
     }>;
   }) => {
