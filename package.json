@@ -24,10 +24,13 @@
   "homepage": "https://github.com/elastic/kibana-buildkite-library#readme",
   "dependencies": {
     "@octokit/rest": "^18.10.0",
-    "axios": "^0.21.4"
+    "axios": "^0.21.4",
+    "globby": "^11.1.0",
+    "js-yaml": "^4.1.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.10",
+    "@types/js-yaml": "^4.0.5",
     "@types/mocha": "^7.0.2",
     "@types/node": "^15.12.2",
     "@typescript-eslint/eslint-plugin": "^2.23.0",

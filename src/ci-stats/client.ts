@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, Method, AxiosRequestConfig } from 'axios';
+import axios, { Method, AxiosRequestConfig } from 'axios';
 
 export type CiStatsClientConfig = {
   baseUrl?: string;
@@ -14,6 +14,37 @@ export type CiStatsPrReport = {
   success: boolean;
 };
 
+export interface CompleteSuccessBuildSource {
+  jobName: string;
+  jobRunner: string;
+  completedAt: string;
+  commit: string;
+  startedAt: string;
+  branch: string;
+  result: 'SUCCESS';
+  jobId: string;
+  targetBranch: string | null;
+  fromKibanaCiProduction: boolean;
+  requiresValidMetrics: boolean | null;
+  jobUrl: string;
+  mergeBase: string | null;
+}
+
+export interface TestGroupRunOrderResponse {
+  /** The Kibana branch to get stats for, eg "main" */
+  sources: CompleteSuccessBuildSource[];
+  /** The CI job names to filter builds by, eg "kibana-hourly" */
+  types: Array<{
+    type: string;
+    count: number;
+    groups: Array<{
+      durationMin: number;
+      names: string[];
+    }>;
+    namesWithoutDurations: string[];
+  }>;
+}
+
 interface RequestOptions {
   path: string;
   method?: Method;
@@ -23,18 +54,17 @@ interface RequestOptions {
 }
 
 export class CiStatsClient {
-  http: AxiosInstance;
+  private readonly baseUrl: string;
+  private readonly defaultHeaders: Record<string, string>;
 
   constructor(config: CiStatsClientConfig = {}) {
     const CI_STATS_HOST = config.baseUrl ?? process.env.CI_STATS_HOST;
     const CI_STATS_TOKEN = config.token ?? process.env.CI_STATS_TOKEN;
 
-    this.http = axios.create({
-      baseURL: `https://${CI_STATS_HOST}`,
-      headers: {
-        Authorization: `token ${CI_STATS_TOKEN}`,
-      },
-    });
+    this.baseUrl = `https://${CI_STATS_HOST}`;
+    this.defaultHeaders = {
+      Authorization: `token ${CI_STATS_TOKEN}`,
+    };
   }
 
   createBuild = async () => {
@@ -103,6 +133,40 @@ export class CiStatsClient {
     return resp.data;
   };
 
+  pickTestGroupRunOrder = async (body: {
+    sources: Array<
+      | {
+          branch: string;
+          jobName: string;
+        }
+      | {
+          prId: string;
+          jobName: string;
+        }
+      | {
+          commit: string;
+          jobName: string;
+        }
+    >;
+    groups: Array<{
+      type: string;
+      defaultMin?: number;
+      targetMin: number;
+      maxMin: number;
+      names: string[];
+    }>;
+  }) => {
+    const resp = await axios.request<TestGroupRunOrderResponse>({
+      method: 'POST',
+      baseURL: this.baseUrl,
+      headers: this.defaultHeaders,
+      url: '/v1/_pick_test_group_run_order',
+      data: body,
+    });
+
+    return resp.data;
+  };
+
   private async request<T>({ method, path, params, body, maxAttempts = 3 }: RequestOptions) {
     let attempt = 0;
 
@@ -110,11 +174,13 @@ export class CiStatsClient {
     while (true) {
       attempt += 1;
       try {
-        return await this.http.request<T>({
+        return await axios.request<T>({
           method,
+          baseURL: this.baseUrl,
           url: path,
           params,
           data: body,
+          headers: this.defaultHeaders,
         });
       } catch (error) {
         console.error('CI Stats request error:', error);
