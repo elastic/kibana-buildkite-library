@@ -74,7 +74,7 @@ export async function pickTestGroupRunOrder() {
     },
   );
 
-  const { sourceBuild, types } = await ciStats.pickTestGroupRunOrder({
+  const { sources, types } = await ciStats.pickTestGroupRunOrder({
     sources: [
       // try to get times from a recent successful job on this PR
       ...(process.env.GITHUB_PR_NUMBER
@@ -119,7 +119,7 @@ export async function pickTestGroupRunOrder() {
   });
 
   console.log('test run order is determined by build:');
-  console.dir(sourceBuild, { depth: Infinity });
+  console.dir(sources, { depth: Infinity });
 
   const unit = getRunGroup(bk, types, unitType);
   const integration = getRunGroup(bk, types, integrationType);

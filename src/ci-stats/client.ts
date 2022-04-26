@@ -32,7 +32,7 @@ export interface CompleteSuccessBuildSource {
 
 export interface TestGroupRunOrderResponse {
   /** The Kibana branch to get stats for, eg "main" */
-  sourceBuild: CompleteSuccessBuildSource;
+  sources: CompleteSuccessBuildSource[];
   /** The CI job names to filter builds by, eg "kibana-hourly" */
   types: Array<{
     type: string;
