@@ -151,6 +151,7 @@ export class CiStatsClient {
       defaultMin?: number;
       targetMin: number;
       maxMin: number;
+      overheadMin?: number;
       names: string[];
     }>;
   }) => {

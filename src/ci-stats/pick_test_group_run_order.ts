@@ -1,6 +1,7 @@
 import * as Fs from 'fs';
 
 import * as globby from 'globby';
+import { load as loadYaml } from 'js-yaml';
 
 import { BuildkiteClient } from '../buildkite';
 import { CiStatsClient, TestGroupRunOrderResponse } from './client';
@@ -20,15 +21,15 @@ function getRunGroup(bk: BuildkiteClient, types: RunGroup[], typeName: string): 
       'warning',
       [
         misses === 1
-          ? `The following ${typeName} config doesn't have a recorded time in ci-stats so the Jest groups might be a little unbalanced.`
-          : `The following ${typeName} configs don't have recorded times in ci-stats so the Jest groups might be a little unbalanced.`,
+          ? `The following "${typeName}" config doesn't have a recorded time in ci-stats so the automatically-determined test groups might be a little unbalanced.`
+          : `The following "${typeName}" configs don't have recorded times in ci-stats so the automatically-determined test groups might be a little unbalanced.`,
         misses === 1
           ? `If this is a new config then this warning can be ignored as times will be reported soon.`
           : `If these are new configs then this warning can be ignored as times will be reported soon.`,
         misses === 1
           ? `The other possibility is that there aren't any tests in this config, so times are never reported.`
           : `The other possibility is that there aren't any tests in these configs, so times are never reported.`,
-        'Empty Jest config files should be removed',
+        'Empty test configs should be removed',
         '',
         ...type.namesWithoutDurations.map((n) => ` - ${n}`),
       ].join('\n'),
@@ -55,6 +56,32 @@ function getTrackedBranch(): string {
   return branch;
 }
 
+function isObj(x: unknown): x is Record<string, unknown> {
+  return typeof x === 'object' && x !== null;
+}
+
+function getEnabledFtrConfigs() {
+  try {
+    const configs = loadYaml(Fs.readFileSync('.buildkite/ftr_configs.yml', 'utf8'));
+    if (!isObj(configs)) {
+      throw new Error('expected yaml file to parse to an object');
+    }
+    if (!configs.enabled) {
+      throw new Error('expected yaml file to have an "enabled" key');
+    }
+    if (
+      !Array.isArray(configs.enabled) ||
+      !configs.enabled.every((p): p is string => typeof p === 'string')
+    ) {
+      throw new Error('expected "enabled" value to be an array of strings');
+    }
+    return configs.enabled;
+  } catch (_) {
+    const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
+    throw new Error(`unable to parse ftr_configs.yml file: ${error.message}`);
+  }
+}
+
 function filterJestConfigByType(type: string) {
   return (path: string) => {
     if (type === 'integration') {
@@ -74,12 +101,14 @@ export async function pickTestGroupRunOrder() {
   const ciStats = new CiStatsClient();
 
   // these keys are synchronized in a few placed by storing them in the env during builds
-  const unitType = process.env.TEST_GROUP_TYPE_UNIT;
-  const integrationType = process.env.TEST_GROUP_TYPE_INTEGRATION;
-  if (!unitType || !integrationType) {
-    throw new Error('missing jest test group type environment variables');
+  const UNIT_TYPE = process.env.TEST_GROUP_TYPE_UNIT;
+  const INTEGRATION_TYPE = process.env.TEST_GROUP_TYPE_INTEGRATION;
+  const FUNCTIONAL_TYPE = process.env.TEST_GROUP_TYPE_FUNCTIONAL;
+  if (!UNIT_TYPE || !INTEGRATION_TYPE || !FUNCTIONAL_TYPE) {
+    throw new Error('missing jest/functional test group type environment variables');
   }
 
+  const ftrConfigs = getEnabledFtrConfigs();
   const jestFiles = globby
     .sync(['**/jest.config.js', '**/jest.integration.config.js', '!**/__fixtures__/**'], {
       cwd: process.cwd(),
@@ -126,18 +155,26 @@ export async function pickTestGroupRunOrder() {
     ],
     groups: [
       {
-        type: unitType,
+        type: UNIT_TYPE,
         defaultMin: 3,
         targetMin: 40,
         maxMin: 45,
         names: unitConfigs,
       },
       {
-        type: integrationType,
+        type: INTEGRATION_TYPE,
         defaultMin: 10,
         targetMin: 40,
         maxMin: 45,
         names: integrationConfigs,
+      },
+      {
+        type: FUNCTIONAL_TYPE,
+        defaultMin: 60,
+        targetMin: 35,
+        maxMin: 40,
+        overheadMin: 1,
+        names: ftrConfigs,
       },
     ],
   });
@@ -145,52 +182,76 @@ export async function pickTestGroupRunOrder() {
   console.log('test run order is determined by builds:');
   console.dir(sources, { depth: Infinity });
 
-  const unit = getRunGroup(bk, types, unitType);
-  const integration = getRunGroup(bk, types, integrationType);
+  const unit = getRunGroup(bk, types, UNIT_TYPE);
+  const integration = getRunGroup(bk, types, INTEGRATION_TYPE);
+  const functional = getRunGroup(bk, types, FUNCTIONAL_TYPE);
 
   // write the config for each step to an artifact that can be used by the individual jest jobs
   Fs.writeFileSync('jest_run_order.json', JSON.stringify({ unit, integration }, null, 2));
   bk.uploadArtifacts('jest_run_order.json');
 
+  // write the config for functional steps to an artifact that can be used by the individual functional jobs
+  Fs.writeFileSync('ftr_run_order.json', JSON.stringify(functional, null, 2));
+  bk.uploadArtifacts('ftr_run_order.json');
+
   // upload the step definitions to Buildkite
   bk.uploadSteps(
     [
-      unit.count > 0
+      // unit.count > 0
+      //   ? {
+      //       label: 'Jest Tests',
+      //       command: '.buildkite/scripts/steps/test/jest.sh',
+      //       parallelism: unit.count,
+      //       timeout_in_minutes: 90,
+      //       key: 'jest',
+      //       agents: {
+      //         queue: 'n2-4-spot',
+      //       },
+      //       retry: {
+      //         automatic: [
+      //           {
+      //             exit_status: '-1',
+      //             limit: 3,
+      //           },
+      //         ],
+      //       },
+      //     }
+      //   : [],
+      // integration.count > 0
+      //   ? {
+      //       label: 'Jest Integration Tests',
+      //       command: '.buildkite/scripts/steps/test/jest_integration.sh',
+      //       parallelism: integration.count,
+      //       timeout_in_minutes: 120,
+      //       key: 'jest-integration',
+      //       agents: {
+      //         queue: 'n2-4-spot',
+      //       },
+      //       retry: {
+      //         automatic: [
+      //           {
+      //             exit_status: '-1',
+      //             limit: 3,
+      //           },
+      //         ],
+      //       },
+      //     }
+      //   : [],
+      functional.count > 0
         ? {
-            label: 'Jest Tests',
-            command: '.buildkite/scripts/steps/test/jest.sh',
-            parallelism: unit.count,
-            timeout_in_minutes: 90,
-            key: 'jest',
+            command: '.buildkite/scripts/steps/test/ftr_configs.sh',
+            label: 'FTR Configs',
+            parallelism: functional.count,
             agents: {
-              queue: 'n2-4-spot',
+              queue: 'n2-4-spot-2',
             },
+            depends_on: 'build',
+            timeout_in_minutes: 150,
+            key: 'ftr-configs',
             retry: {
               automatic: [
-                {
-                  exit_status: '-1',
-                  limit: 3,
-                },
-              ],
-            },
-          }
-        : [],
-      integration.count > 0
-        ? {
-            label: 'Jest Integration Tests',
-            command: '.buildkite/scripts/steps/test/jest_integration.sh',
-            parallelism: integration.count,
-            timeout_in_minutes: 120,
-            key: 'jest-integration',
-            agents: {
-              queue: 'n2-4-spot',
-            },
-            retry: {
-              automatic: [
-                {
-                  exit_status: '-1',
-                  limit: 3,
-                },
+                { exit_status: '-1', limit: 3 },
+                // { exit_status: '*', limit: 1 },
               ],
             },
           }
