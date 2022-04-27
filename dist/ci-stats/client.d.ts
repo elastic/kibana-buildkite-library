@@ -25,9 +25,7 @@ export interface CompleteSuccessBuildSource {
     mergeBase: string | null;
 }
 export interface TestGroupRunOrderResponse {
-    /** The Kibana branch to get stats for, eg "main" */
-    sources: CompleteSuccessBuildSource[];
-    /** The CI job names to filter builds by, eg "kibana-hourly" */
+    sources: unknown;
     types: Array<{
         type: string;
         count: number;

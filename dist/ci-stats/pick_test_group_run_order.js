@@ -44,6 +44,17 @@ function getTrackedBranch() {
     }
     return branch;
 }
+function filterJestConfigByType(type) {
+    return (path) => {
+        if (type === 'integration') {
+            return path.endsWith('jest.integration.config.js');
+        }
+        if (type === 'unit') {
+            return path.endsWith('jest.config.js');
+        }
+        return false;
+    };
+}
 async function pickTestGroupRunOrder() {
     const bk = new buildkite_1.BuildkiteClient();
     const ciStats = new client_1.CiStatsClient();
@@ -53,10 +64,19 @@ async function pickTestGroupRunOrder() {
     if (!unitType || !integrationType) {
         throw new Error('missing jest test group type environment variables');
     }
-    const jestFiles = globby.sync(['**/jest.config.js', '**/jest.integration.config.js', '!**/__fixtures__/**'], {
+    const jestFiles = globby
+        .sync(['**/jest.config.js', '**/jest.integration.config.js', '!**/__fixtures__/**'], {
         cwd: process.cwd(),
         absolute: false,
-    });
+    })
+        .filter(process.env.FILTER_JEST_CONFIG_TYPE
+        ? filterJestConfigByType(process.env.FILTER_JEST_CONFIG_TYPE)
+        : () => true);
+    const unitConfigs = jestFiles.filter(filterJestConfigByType('unit'));
+    const integrationConfigs = jestFiles.filter(filterJestConfigByType('integration'));
+    if (!unitConfigs.length && !integrationConfigs.length) {
+        throw new Error('unable to find any unit or integration configs');
+    }
     const { sources, types } = await ciStats.pickTestGroupRunOrder({
         sources: [
             // try to get times from a recent successful job on this PR
@@ -89,18 +109,18 @@ async function pickTestGroupRunOrder() {
                 defaultMin: 3,
                 targetMin: 40,
                 maxMin: 45,
-                names: jestFiles.filter((p) => p.endsWith('jest.config.js')),
+                names: unitConfigs,
             },
             {
                 type: integrationType,
                 defaultMin: 10,
                 targetMin: 40,
                 maxMin: 45,
-                names: jestFiles.filter((p) => p.endsWith('jest.integration.config.js')),
+                names: integrationConfigs,
             },
         ],
     });
-    console.log('test run order is determined by build:');
+    console.log('test run order is determined by builds:');
     console.dir(sources, { depth: Infinity });
     const unit = getRunGroup(bk, types, unitType);
     const integration = getRunGroup(bk, types, integrationType);
@@ -109,43 +129,47 @@ async function pickTestGroupRunOrder() {
     bk.uploadArtifacts('jest_run_order.json');
     // upload the step definitions to Buildkite
     bk.uploadSteps([
-        {
-            label: 'Jest Tests',
-            command: '.buildkite/scripts/steps/test/jest.sh',
-            parallelism: unit.count,
-            timeout_in_minutes: 90,
-            key: 'jest',
-            agents: {
-                queue: 'n2-4-spot',
-            },
-            retry: {
-                automatic: [
-                    {
-                        exit_status: '-1',
-                        limit: 3,
-                    },
-                ],
-            },
-        },
-        {
-            label: 'Jest Integration Tests',
-            command: '.buildkite/scripts/steps/test/jest_integration.sh',
-            parallelism: integration.count,
-            timeout_in_minutes: 120,
-            key: 'jest-integration',
-            agents: {
-                queue: 'n2-4-spot',
-            },
-            retry: {
-                automatic: [
-                    {
-                        exit_status: '-1',
-                        limit: 3,
-                    },
-                ],
-            },
-        },
-    ]);
+        unit.count > 0
+            ? {
+                label: 'Jest Tests',
+                command: '.buildkite/scripts/steps/test/jest.sh',
+                parallelism: unit.count,
+                timeout_in_minutes: 90,
+                key: 'jest',
+                agents: {
+                    queue: 'n2-4-spot',
+                },
+                retry: {
+                    automatic: [
+                        {
+                            exit_status: '-1',
+                            limit: 3,
+                        },
+                    ],
+                },
+            }
+            : [],
+        integration.count > 0
+            ? {
+                label: 'Jest Integration Tests',
+                command: '.buildkite/scripts/steps/test/jest_integration.sh',
+                parallelism: integration.count,
+                timeout_in_minutes: 120,
+                key: 'jest-integration',
+                agents: {
+                    queue: 'n2-4-spot',
+                },
+                retry: {
+                    automatic: [
+                        {
+                            exit_status: '-1',
+                            limit: 3,
+                        },
+                    ],
+                },
+            }
+            : [],
+    ].flat());
 }
 exports.pickTestGroupRunOrder = pickTestGroupRunOrder;
 //# sourceMappingURL=pick_test_group_run_order.js.map
