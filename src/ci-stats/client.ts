@@ -149,7 +149,6 @@ export class CiStatsClient {
     groups: Array<{
       type: string;
       defaultMin?: number;
-      targetMin: number;
       maxMin: number;
       overheadMin?: number;
       names: string[];
@@ -159,7 +158,7 @@ export class CiStatsClient {
       method: 'POST',
       baseURL: this.baseUrl,
       headers: this.defaultHeaders,
-      url: '/v1/_pick_test_group_run_order',
+      url: '/v2/_pick_test_group_run_order',
       data: body,
     });
 

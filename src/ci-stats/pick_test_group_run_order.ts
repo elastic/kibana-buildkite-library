@@ -157,21 +157,18 @@ export async function pickTestGroupRunOrder() {
       {
         type: UNIT_TYPE,
         defaultMin: 3,
-        targetMin: 40,
-        maxMin: 45,
+        maxMin: 50,
         names: unitConfigs,
       },
       {
         type: INTEGRATION_TYPE,
         defaultMin: 10,
-        targetMin: 40,
-        maxMin: 45,
+        maxMin: 50,
         names: integrationConfigs,
       },
       {
         type: FUNCTIONAL_TYPE,
         defaultMin: 60,
-        targetMin: 35,
         maxMin: 40,
         overheadMin: 1,
         names: ftrConfigs,
