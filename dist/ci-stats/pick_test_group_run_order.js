@@ -152,7 +152,7 @@ async function pickTestGroupRunOrder() {
         ],
     });
     console.log('test run order is determined by builds:');
-    console.dir(sources, { depth: Infinity });
+    console.dir(sources, { depth: Infinity, maxArrayLength: Infinity });
     const unit = getRunGroup(bk, types, UNIT_TYPE);
     const integration = getRunGroup(bk, types, INTEGRATION_TYPE);
     const functional = getRunGroup(bk, types, FUNCTIONAL_TYPE);
