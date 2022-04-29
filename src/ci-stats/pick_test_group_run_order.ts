@@ -248,7 +248,7 @@ export async function pickTestGroupRunOrder() {
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
-                // { exit_status: '*', limit: 1 },
+                { exit_status: '*', limit: 1 },
               ],
             },
           }
