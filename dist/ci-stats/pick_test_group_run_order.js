@@ -164,46 +164,46 @@ async function pickTestGroupRunOrder() {
     bk.uploadArtifacts('ftr_run_order.json');
     // upload the step definitions to Buildkite
     bk.uploadSteps([
-        // unit.count > 0
-        //   ? {
-        //       label: 'Jest Tests',
-        //       command: '.buildkite/scripts/steps/test/jest.sh',
-        //       parallelism: unit.count,
-        //       timeout_in_minutes: 90,
-        //       key: 'jest',
-        //       agents: {
-        //         queue: 'n2-4-spot',
-        //       },
-        //       retry: {
-        //         automatic: [
-        //           {
-        //             exit_status: '-1',
-        //             limit: 3,
-        //           },
-        //         ],
-        //       },
-        //     }
-        //   : [],
-        // integration.count > 0
-        //   ? {
-        //       label: 'Jest Integration Tests',
-        //       command: '.buildkite/scripts/steps/test/jest_integration.sh',
-        //       parallelism: integration.count,
-        //       timeout_in_minutes: 120,
-        //       key: 'jest-integration',
-        //       agents: {
-        //         queue: 'n2-4-spot',
-        //       },
-        //       retry: {
-        //         automatic: [
-        //           {
-        //             exit_status: '-1',
-        //             limit: 3,
-        //           },
-        //         ],
-        //       },
-        //     }
-        //   : [],
+        unit.count > 0
+            ? {
+                label: 'Jest Tests',
+                command: '.buildkite/scripts/steps/test/jest.sh',
+                parallelism: unit.count,
+                timeout_in_minutes: 90,
+                key: 'jest',
+                agents: {
+                    queue: 'n2-4-spot',
+                },
+                retry: {
+                    automatic: [
+                        {
+                            exit_status: '-1',
+                            limit: 3,
+                        },
+                    ],
+                },
+            }
+            : [],
+        integration.count > 0
+            ? {
+                label: 'Jest Integration Tests',
+                command: '.buildkite/scripts/steps/test/jest_integration.sh',
+                parallelism: integration.count,
+                timeout_in_minutes: 120,
+                key: 'jest-integration',
+                agents: {
+                    queue: 'n2-4-spot',
+                },
+                retry: {
+                    automatic: [
+                        {
+                            exit_status: '-1',
+                            limit: 3,
+                        },
+                    ],
+                },
+            }
+            : [],
         functional.count > 0
             ? {
                 command: '.buildkite/scripts/steps/test/ftr_configs.sh',
