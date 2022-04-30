@@ -82,23 +82,15 @@ function getEnabledFtrConfigs() {
   }
 }
 
-function filterJestConfigByType(type: string) {
-  return (path: string) => {
-    if (type === 'integration') {
-      return path.endsWith('jest.integration.config.js');
-    }
-
-    if (type === 'unit') {
-      return path.endsWith('jest.config.js');
-    }
-
-    return false;
-  };
-}
-
 export async function pickTestGroupRunOrder() {
   const bk = new BuildkiteClient();
   const ciStats = new CiStatsClient();
+
+  const TYPE_FILTERS = process.env.LIMIT_CONFIG_TYPE
+    ? process.env.LIMIT_CONFIG_TYPE.split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+    : undefined;
 
   // these keys are synchronized in a few placed by storing them in the env during builds
   const UNIT_TYPE = process.env.TEST_GROUP_TYPE_UNIT;
@@ -108,23 +100,24 @@ export async function pickTestGroupRunOrder() {
     throw new Error('missing jest/functional test group type environment variables');
   }
 
-  const ftrConfigs = getEnabledFtrConfigs();
-  const jestFiles = globby
-    .sync(['**/jest.config.js', '**/jest.integration.config.js', '!**/__fixtures__/**'], {
-      cwd: process.cwd(),
-      absolute: false,
-    })
-    .filter(
-      process.env.FILTER_JEST_CONFIG_TYPE
-        ? filterJestConfigByType(process.env.FILTER_JEST_CONFIG_TYPE)
-        : () => true,
-    );
+  const ftrConfigs = !TYPE_FILTERS || TYPE_FILTERS.includes('functional') ? getEnabledFtrConfigs() : [];
+  const jestUnitConfigs =
+    !TYPE_FILTERS || TYPE_FILTERS.includes('unit')
+      ? globby.sync(['**/jest.config.js', '!**/__fixtures__/**'], {
+          cwd: process.cwd(),
+          absolute: false,
+        })
+      : [];
+  const jestIntegrationConfigs =
+    !TYPE_FILTERS || TYPE_FILTERS.includes('integration')
+      ? globby.sync(['**/jest.integration.config.js', '!**/__fixtures__/**'], {
+          cwd: process.cwd(),
+          absolute: false,
+        })
+      : [];
 
-  const unitConfigs = jestFiles.filter(filterJestConfigByType('unit'));
-  const integrationConfigs = jestFiles.filter(filterJestConfigByType('integration'));
-
-  if (!unitConfigs.length && !integrationConfigs.length) {
-    throw new Error('unable to find any unit or integration configs');
+  if (!ftrConfigs.length && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
+    throw new Error('unable to find any unit, integration, or FTR configs');
   }
 
   const { sources, types } = await ciStats.pickTestGroupRunOrder({
@@ -158,13 +151,13 @@ export async function pickTestGroupRunOrder() {
         type: UNIT_TYPE,
         defaultMin: 3,
         maxMin: 50,
-        names: unitConfigs,
+        names: jestUnitConfigs,
       },
       {
         type: INTEGRATION_TYPE,
         defaultMin: 10,
         maxMin: 50,
-        names: integrationConfigs,
+        names: jestIntegrationConfigs,
       },
       {
         type: FUNCTIONAL_TYPE,
@@ -236,15 +229,15 @@ export async function pickTestGroupRunOrder() {
         : [],
       functional.count > 0
         ? {
-            command: '.buildkite/scripts/steps/test/ftr_configs.sh',
             label: 'FTR Configs',
+            command: '.buildkite/scripts/steps/test/ftr_configs.sh',
             parallelism: functional.count,
+            timeout_in_minutes: 150,
+            key: 'ftr-configs',
+            depends_on: 'build',
             agents: {
               queue: 'n2-4-spot-2',
             },
-            depends_on: 'build',
-            timeout_in_minutes: 150,
-            key: 'ftr-configs',
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
