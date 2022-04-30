@@ -143,7 +143,7 @@ async function pickTestGroupRunOrder() {
             {
                 type: FUNCTIONAL_TYPE,
                 defaultMin: 60,
-                maxMin: 40,
+                maxMin: 37,
                 overheadMin: 1.5,
                 names: ftrConfigs,
             },
