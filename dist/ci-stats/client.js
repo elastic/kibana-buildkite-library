@@ -68,7 +68,7 @@ class CiStatsClient {
                 method: 'POST',
                 baseURL: this.baseUrl,
                 headers: this.defaultHeaders,
-                url: '/v1/_pick_test_group_run_order',
+                url: '/v2/_pick_test_group_run_order',
                 data: body,
             });
             return resp.data;

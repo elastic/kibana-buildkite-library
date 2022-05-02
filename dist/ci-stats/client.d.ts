@@ -59,8 +59,8 @@ export declare class CiStatsClient {
         groups: Array<{
             type: string;
             defaultMin?: number;
-            targetMin: number;
             maxMin: number;
+            overheadMin?: number;
             names: string[];
         }>;
     }) => Promise<TestGroupRunOrderResponse>;

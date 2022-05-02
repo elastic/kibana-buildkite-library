@@ -28,6 +28,7 @@ export type BuildkiteStep = {
   };
   timeout_in_minutes?: number;
   key: string;
+  depends_on?: string;
   retry?: {
     automatic: Array<{
       exit_status: string;
