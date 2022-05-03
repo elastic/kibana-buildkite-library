@@ -7,6 +7,7 @@ const js_yaml_1 = require("js-yaml");
 const buildkite_1 = require("../buildkite");
 const client_1 = require("./client");
 function getRunGroup(bk, types, typeName) {
+    var _a, _b, _c;
     const type = types.find((t) => t.type === typeName);
     if (!type) {
         throw new Error(`missing test group run order for group [${typeName}]`);
@@ -26,6 +27,16 @@ function getRunGroup(bk, types, typeName) {
             'Empty test configs should be removed',
             '',
             ...type.namesWithoutDurations.map((n) => ` - ${n}`),
+        ].join('\n'));
+    }
+    const tooLongs = (_b = (_a = type.tooLong) === null || _a === void 0 ? void 0 : _a.length) !== null && _b !== void 0 ? _b : 0;
+    if (tooLongs > 0) {
+        bk.setAnnotation(`test-group-too-long:${typeName}`, 'error', [
+            tooLongs === 1
+                ? `The following "${typeName}" config has a duration that exceeds the maximum amount of time desired for a single CI job. Please split it up.`
+                : `The following "${typeName}" configs have durations that exceed the maximum amount of time desired for a single CI job. Please split them up.`,
+            '',
+            ...((_c = type.tooLong) !== null && _c !== void 0 ? _c : []).map(({ config, durationMin }) => ` - ${config}: ${durationMin} minutes`),
         ].join('\n'));
     }
     return type;

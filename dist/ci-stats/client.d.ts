@@ -33,6 +33,10 @@ export interface TestGroupRunOrderResponse {
             durationMin: number;
             names: string[];
         }>;
+        tooLong?: Array<{
+            config: string;
+            durationMin: number;
+        }>;
         namesWithoutDurations: string[];
     }>;
 }

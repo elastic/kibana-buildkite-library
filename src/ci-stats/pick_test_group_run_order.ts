@@ -36,6 +36,21 @@ function getRunGroup(bk: BuildkiteClient, types: RunGroup[], typeName: string): 
     );
   }
 
+  const tooLongs = type.tooLong?.length ?? 0;
+  if (tooLongs > 0) {
+    bk.setAnnotation(
+      `test-group-too-long:${typeName}`,
+      'error',
+      [
+        tooLongs === 1
+          ? `The following "${typeName}" config has a duration that exceeds the maximum amount of time desired for a single CI job. Please split it up.`
+          : `The following "${typeName}" configs have durations that exceed the maximum amount of time desired for a single CI job. Please split them up.`,
+        '',
+        ...(type.tooLong ?? []).map(({ config, durationMin }) => ` - ${config}: ${durationMin} minutes`),
+      ].join('\n'),
+    );
+  }
+
   return type;
 }
 
