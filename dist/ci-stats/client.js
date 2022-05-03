@@ -64,6 +64,8 @@ class CiStatsClient {
             return resp.data;
         };
         this.pickTestGroupRunOrder = async (body) => {
+            console.log('requesting test group run order from ci-stats:');
+            console.log(JSON.stringify(body, null, 2));
             const resp = await axios_1.default.request({
                 method: 'POST',
                 baseURL: this.baseUrl,

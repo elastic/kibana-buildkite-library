@@ -154,6 +154,9 @@ export class CiStatsClient {
       names: string[];
     }>;
   }) => {
+    console.log('requesting test group run order from ci-stats:');
+    console.log(JSON.stringify(body, null, 2));
+
     const resp = await axios.request<TestGroupRunOrderResponse>({
       method: 'POST',
       baseURL: this.baseUrl,
