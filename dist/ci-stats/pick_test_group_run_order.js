@@ -93,6 +93,12 @@ async function pickTestGroupRunOrder() {
     const UNIT_TYPE = getRequiredEnv('TEST_GROUP_TYPE_UNIT');
     const INTEGRATION_TYPE = getRequiredEnv('TEST_GROUP_TYPE_INTEGRATION');
     const FUNCTIONAL_TYPE = getRequiredEnv('TEST_GROUP_TYPE_FUNCTIONAL');
+    const FUNCTIONAL_MAX_MINUTES = process.env.FUNCTIONAL_MAX_MINUTES
+        ? parseInt(process.env.FUNCTIONAL_MAX_MINUTES, 10)
+        : 37;
+    if (Number.isNaN(FUNCTIONAL_MAX_MINUTES)) {
+        throw new Error(`invalid FUNCTIONAL_MAX_MINUTES: ${process.env.FUNCTIONAL_MAX_MINUTES}`);
+    }
     const TYPE_FILTERS = process.env.LIMIT_CONFIG_TYPE
         ? process.env.LIMIT_CONFIG_TYPE.split(',')
             .map((t) => t.trim())
@@ -158,7 +164,7 @@ async function pickTestGroupRunOrder() {
             {
                 type: FUNCTIONAL_TYPE,
                 defaultMin: 60,
-                maxMin: 37,
+                maxMin: FUNCTIONAL_MAX_MINUTES,
                 overheadMin: 1.5,
                 names: ftrConfigs,
             },
