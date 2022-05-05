@@ -6,6 +6,13 @@ const globby = require("globby");
 const js_yaml_1 = require("js-yaml");
 const buildkite_1 = require("../buildkite");
 const client_1 = require("./client");
+const getRequiredEnv = (name) => {
+    const value = process.env[name];
+    if (typeof value !== 'string' || !value) {
+        throw new Error(`Missing required environment variable "${name}"`);
+    }
+    return value;
+};
 function getRunGroup(bk, types, typeName) {
     var _a, _b, _c;
     const type = types.find((t) => t.type === typeName);
@@ -82,18 +89,18 @@ function getEnabledFtrConfigs() {
 async function pickTestGroupRunOrder() {
     const bk = new buildkite_1.BuildkiteClient();
     const ciStats = new client_1.CiStatsClient();
+    // these keys are synchronized in a few placed by storing them in the env during builds
+    const UNIT_TYPE = getRequiredEnv('TEST_GROUP_TYPE_UNIT');
+    const INTEGRATION_TYPE = getRequiredEnv('TEST_GROUP_TYPE_INTEGRATION');
+    const FUNCTIONAL_TYPE = getRequiredEnv('TEST_GROUP_TYPE_FUNCTIONAL');
+    const JEST_UNIT_SCRIPT = getRequiredEnv('JEST_UNIT_SCRIPT');
+    const JEST_INTEGRATION_SCRIPT = getRequiredEnv('JEST_INTEGRATION_SCRIPT');
+    const FTR_CONFIGS_SCRIPT = getRequiredEnv('FTR_CONFIGS_SCRIPT');
     const TYPE_FILTERS = process.env.LIMIT_CONFIG_TYPE
         ? process.env.LIMIT_CONFIG_TYPE.split(',')
             .map((t) => t.trim())
             .filter(Boolean)
         : undefined;
-    // these keys are synchronized in a few placed by storing them in the env during builds
-    const UNIT_TYPE = process.env.TEST_GROUP_TYPE_UNIT;
-    const INTEGRATION_TYPE = process.env.TEST_GROUP_TYPE_INTEGRATION;
-    const FUNCTIONAL_TYPE = process.env.TEST_GROUP_TYPE_FUNCTIONAL;
-    if (!UNIT_TYPE || !INTEGRATION_TYPE || !FUNCTIONAL_TYPE) {
-        throw new Error('missing jest/functional test group type environment variables');
-    }
     const ftrConfigs = !TYPE_FILTERS || TYPE_FILTERS.includes('functional') ? getEnabledFtrConfigs() : [];
     const jestUnitConfigs = !TYPE_FILTERS || TYPE_FILTERS.includes('unit')
         ? globby.sync(['**/jest.config.js', '!**/__fixtures__/**'], {
@@ -176,7 +183,7 @@ async function pickTestGroupRunOrder() {
         unit.count > 0
             ? {
                 label: 'Jest Tests',
-                command: '.buildkite/scripts/steps/test/jest.sh',
+                command: JEST_UNIT_SCRIPT,
                 parallelism: unit.count,
                 timeout_in_minutes: 90,
                 key: 'jest',
@@ -196,7 +203,7 @@ async function pickTestGroupRunOrder() {
         integration.count > 0
             ? {
                 label: 'Jest Integration Tests',
-                command: '.buildkite/scripts/steps/test/jest_integration.sh',
+                command: JEST_INTEGRATION_SCRIPT,
                 parallelism: integration.count,
                 timeout_in_minutes: 120,
                 key: 'jest-integration',
@@ -216,7 +223,7 @@ async function pickTestGroupRunOrder() {
         functional.count > 0
             ? {
                 label: 'FTR Configs',
-                command: '.buildkite/scripts/steps/test/ftr_configs.sh',
+                command: FTR_CONFIGS_SCRIPT,
                 parallelism: functional.count,
                 timeout_in_minutes: 150,
                 key: 'ftr-configs',
