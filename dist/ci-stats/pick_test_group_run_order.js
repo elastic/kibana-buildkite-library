@@ -93,9 +93,6 @@ async function pickTestGroupRunOrder() {
     const UNIT_TYPE = getRequiredEnv('TEST_GROUP_TYPE_UNIT');
     const INTEGRATION_TYPE = getRequiredEnv('TEST_GROUP_TYPE_INTEGRATION');
     const FUNCTIONAL_TYPE = getRequiredEnv('TEST_GROUP_TYPE_FUNCTIONAL');
-    const JEST_UNIT_SCRIPT = getRequiredEnv('JEST_UNIT_SCRIPT');
-    const JEST_INTEGRATION_SCRIPT = getRequiredEnv('JEST_INTEGRATION_SCRIPT');
-    const FTR_CONFIGS_SCRIPT = getRequiredEnv('FTR_CONFIGS_SCRIPT');
     const TYPE_FILTERS = process.env.LIMIT_CONFIG_TYPE
         ? process.env.LIMIT_CONFIG_TYPE.split(',')
             .map((t) => t.trim())
@@ -183,7 +180,7 @@ async function pickTestGroupRunOrder() {
         unit.count > 0
             ? {
                 label: 'Jest Tests',
-                command: JEST_UNIT_SCRIPT,
+                command: getRequiredEnv('JEST_UNIT_SCRIPT'),
                 parallelism: unit.count,
                 timeout_in_minutes: 90,
                 key: 'jest',
@@ -203,7 +200,7 @@ async function pickTestGroupRunOrder() {
         integration.count > 0
             ? {
                 label: 'Jest Integration Tests',
-                command: JEST_INTEGRATION_SCRIPT,
+                command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
                 parallelism: integration.count,
                 timeout_in_minutes: 120,
                 key: 'jest-integration',
@@ -223,7 +220,7 @@ async function pickTestGroupRunOrder() {
         functional.count > 0
             ? {
                 label: 'FTR Configs',
-                command: FTR_CONFIGS_SCRIPT,
+                command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
                 parallelism: functional.count,
                 timeout_in_minutes: 150,
                 key: 'ftr-configs',
