@@ -15,7 +15,7 @@ export declare type BuildkiteStep = {
     };
     timeout_in_minutes?: number;
     key: string;
-    depends_on?: string;
+    depends_on?: string | string[];
     retry?: {
         automatic: Array<{
             exit_status: string;

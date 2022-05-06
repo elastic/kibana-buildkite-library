@@ -132,6 +132,13 @@ export async function pickTestGroupRunOrder() {
         .filter(Boolean)
     : undefined;
 
+  const FTR_CONFIGS_DEPS =
+    process.env.FTR_CONFIGS_DEPS !== undefined
+      ? process.env.FTR_CONFIGS_DEPS.split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : ['build'];
+
   const ftrConfigs = !TYPE_FILTERS || TYPE_FILTERS.includes('functional') ? getEnabledFtrConfigs() : [];
   const jestUnitConfigs =
     !TYPE_FILTERS || TYPE_FILTERS.includes('unit')
@@ -268,7 +275,7 @@ export async function pickTestGroupRunOrder() {
             parallelism: functional.count,
             timeout_in_minutes: 150,
             key: 'ftr-configs',
-            depends_on: 'build',
+            depends_on: FTR_CONFIGS_DEPS,
             agents: {
               queue: 'n2-4-spot-2',
             },
