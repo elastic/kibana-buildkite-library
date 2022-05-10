@@ -120,7 +120,7 @@ async function pickTestGroupRunOrder() {
     const FUNCTIONAL_MINIMUM_ISOLATION_MIN = process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN
         ? parseInt(process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN, 10)
         : undefined;
-    if (FUNCTIONAL_MINIMUM_ISOLATION_MIN !== undefined && !Number.isNaN(FUNCTIONAL_MINIMUM_ISOLATION_MIN)) {
+    if (FUNCTIONAL_MINIMUM_ISOLATION_MIN !== undefined && Number.isNaN(FUNCTIONAL_MINIMUM_ISOLATION_MIN)) {
         throw new Error(`invalid FUNCTIONAL_MINIMUM_ISOLATION_MIN: ${process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN}`);
     }
     const FTR_CONFIGS_DEPS = process.env.FTR_CONFIGS_DEPS !== undefined
