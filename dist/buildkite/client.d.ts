@@ -6,6 +6,10 @@ export declare type BuildkiteClientConfig = {
     baseUrl?: string;
     token?: string;
 };
+export declare type BuildkiteGroup = {
+    group: string;
+    steps: BuildkiteStep[];
+};
 export declare type BuildkiteStep = {
     command: string;
     label: string;
@@ -14,13 +18,16 @@ export declare type BuildkiteStep = {
         queue: string;
     };
     timeout_in_minutes?: number;
-    key: string;
+    key?: string;
     depends_on?: string | string[];
     retry?: {
         automatic: Array<{
             exit_status: string;
             limit: number;
         }>;
+    };
+    env?: {
+        [key: string]: string;
     };
 };
 export declare class BuildkiteClient {
@@ -39,5 +46,5 @@ export declare class BuildkiteClient {
     setMetadata: (key: string, value: string) => void;
     setAnnotation: (context: string, style: 'info' | 'success' | 'warning' | 'error', value: string) => void;
     uploadArtifacts: (pattern: string) => void;
-    uploadSteps: (steps: BuildkiteStep[]) => void;
+    uploadSteps: (steps: Array<BuildkiteStep | BuildkiteGroup>) => void;
 }

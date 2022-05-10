@@ -4,7 +4,7 @@ import * as globby from 'globby';
 import * as minimatch from 'minimatch';
 import { load as loadYaml } from 'js-yaml';
 
-import { BuildkiteClient } from '../buildkite';
+import { BuildkiteClient, BuildkiteStep } from '../buildkite';
 import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 
 type RunGroup = TestGroupRunOrderResponse['types'][0];
@@ -267,6 +267,11 @@ export async function pickTestGroupRunOrder() {
   Fs.writeFileSync('ftr_run_order.json', JSON.stringify(functional, null, 2));
   bk.uploadArtifacts('ftr_run_order.json');
 
+  let smallFtrConfigsCounter = 0;
+  const getSmallFtrConfigsLabel = () => {
+    return `Small FTR Configs #${++smallFtrConfigsCounter}`;
+  };
+
   // upload the step definitions to Buildkite
   bk.uploadSteps(
     [
@@ -311,23 +316,48 @@ export async function pickTestGroupRunOrder() {
           }
         : [],
       functional.count > 0
-        ? {
-            label: 'FTR Configs',
-            command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-            parallelism: functional.count,
-            timeout_in_minutes: 150,
-            key: 'ftr-configs',
-            depends_on: FTR_CONFIGS_DEPS,
-            agents: {
-              queue: 'n2-4-spot-2',
-            },
-            retry: {
-              automatic: [
-                { exit_status: '-1', limit: 3 },
-                { exit_status: '*', limit: 1 },
-              ],
-            },
-          }
+        ? FUNCTIONAL_MINIMUM_ISOLATION_MIN === undefined
+          ? {
+              label: 'FTR Configs',
+              key: 'ftr-configs',
+              depends_on: FTR_CONFIGS_DEPS,
+              parallelism: functional.count,
+              command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
+              timeout_in_minutes: 150,
+              agents: {
+                queue: 'n2-4-spot-2',
+              },
+              retry: {
+                automatic: [
+                  { exit_status: '-1', limit: 3 },
+                  { exit_status: '*', limit: 1 },
+                ],
+              },
+            }
+          : {
+              group: 'FTR Configs',
+              key: 'ftr-configs',
+              depends_on: FTR_CONFIGS_DEPS,
+              steps: functional.groups.map(
+                (group, i): BuildkiteStep => ({
+                  label: group.names.length === 1 ? group.names[0] : getSmallFtrConfigsLabel(),
+                  command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
+                  timeout_in_minutes: 150,
+                  agents: {
+                    queue: 'n2-4-spot-2',
+                  },
+                  env: {
+                    FTR_CONFIG_GROUP_INDEX: `${i}`,
+                  },
+                  retry: {
+                    automatic: [
+                      { exit_status: '-1', limit: 3 },
+                      { exit_status: '*', limit: 1 },
+                    ],
+                  },
+                }),
+              ),
+            }
         : [],
     ].flat(),
   );

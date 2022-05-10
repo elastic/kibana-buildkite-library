@@ -19,6 +19,11 @@ export type BuildkiteClientConfig = {
   token?: string;
 };
 
+export type BuildkiteGroup = {
+  group: string;
+  steps: BuildkiteStep[];
+};
+
 export type BuildkiteStep = {
   command: string;
   label: string;
@@ -27,7 +32,7 @@ export type BuildkiteStep = {
     queue: string;
   };
   timeout_in_minutes?: number;
-  key: string;
+  key?: string;
   depends_on?: string | string[];
   retry?: {
     automatic: Array<{
@@ -35,6 +40,7 @@ export type BuildkiteStep = {
       limit: number;
     }>;
   };
+  env?: { [key: string]: string };
 };
 
 export class BuildkiteClient {
@@ -210,7 +216,7 @@ export class BuildkiteClient {
     });
   };
 
-  uploadSteps = (steps: BuildkiteStep[]) => {
+  uploadSteps = (steps: Array<BuildkiteStep | BuildkiteGroup>) => {
     execSync(`buildkite-agent pipeline upload`, {
       input: dump({ steps }),
       stdio: ['pipe', 'inherit', 'inherit'],
