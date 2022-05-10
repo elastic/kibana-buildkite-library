@@ -151,6 +151,7 @@ export class CiStatsClient {
       type: string;
       defaultMin?: number;
       maxMin: number;
+      minimumIsolationMin?: number;
       overheadMin?: number;
       names: string[];
     }>;
