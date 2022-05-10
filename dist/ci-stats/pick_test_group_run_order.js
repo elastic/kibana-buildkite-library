@@ -227,7 +227,7 @@ async function pickTestGroupRunOrder() {
     bk.uploadArtifacts('ftr_run_order.json');
     let smallFtrConfigsCounter = 0;
     const getSmallFtrConfigsLabel = () => {
-        return `Small FTR Configs #${++smallFtrConfigsCounter}`;
+        return `Super Quick FTR Configs #${++smallFtrConfigsCounter}`;
     };
     // upload the step definitions to Buildkite
     bk.uploadSteps([
@@ -294,7 +294,8 @@ async function pickTestGroupRunOrder() {
                     group: 'FTR Configs',
                     key: 'ftr-configs',
                     depends_on: FTR_CONFIGS_DEPS,
-                    steps: functional.groups.map((group, i) => ({
+                    steps: functional.groups
+                        .map((group, i) => ({
                         label: group.names.length === 1 ? group.names[0] : getSmallFtrConfigsLabel(),
                         command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
                         timeout_in_minutes: 150,
@@ -310,7 +311,8 @@ async function pickTestGroupRunOrder() {
                                 { exit_status: '*', limit: 1 },
                             ],
                         },
-                    })),
+                    }))
+                        .sort((a, b) => a.label.localeCompare(b.label)),
                 }
             : [],
     ].flat());

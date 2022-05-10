@@ -269,7 +269,7 @@ export async function pickTestGroupRunOrder() {
 
   let smallFtrConfigsCounter = 0;
   const getSmallFtrConfigsLabel = () => {
-    return `Small FTR Configs #${++smallFtrConfigsCounter}`;
+    return `Super Quick FTR Configs #${++smallFtrConfigsCounter}`;
   };
 
   // upload the step definitions to Buildkite
@@ -338,25 +338,27 @@ export async function pickTestGroupRunOrder() {
               group: 'FTR Configs',
               key: 'ftr-configs',
               depends_on: FTR_CONFIGS_DEPS,
-              steps: functional.groups.map(
-                (group, i): BuildkiteStep => ({
-                  label: group.names.length === 1 ? group.names[0] : getSmallFtrConfigsLabel(),
-                  command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 150,
-                  agents: {
-                    queue: 'n2-4-spot-2',
-                  },
-                  env: {
-                    FTR_CONFIG_GROUP_INDEX: `${i}`,
-                  },
-                  retry: {
-                    automatic: [
-                      { exit_status: '-1', limit: 3 },
-                      { exit_status: '*', limit: 1 },
-                    ],
-                  },
-                }),
-              ),
+              steps: functional.groups
+                .map(
+                  (group, i): BuildkiteStep => ({
+                    label: group.names.length === 1 ? group.names[0] : getSmallFtrConfigsLabel(),
+                    command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
+                    timeout_in_minutes: 150,
+                    agents: {
+                      queue: 'n2-4-spot-2',
+                    },
+                    env: {
+                      FTR_CONFIG_GROUP_INDEX: `${i}`,
+                    },
+                    retry: {
+                      automatic: [
+                        { exit_status: '-1', limit: 3 },
+                        { exit_status: '*', limit: 1 },
+                      ],
+                    },
+                  }),
+                )
+                .sort((a, b) => a.label.localeCompare(b.label)),
             }
         : [],
     ].flat(),
