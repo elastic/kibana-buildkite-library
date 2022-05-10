@@ -120,13 +120,13 @@ export async function pickTestGroupRunOrder() {
   const INTEGRATION_TYPE = getRequiredEnv('TEST_GROUP_TYPE_INTEGRATION');
   const FUNCTIONAL_TYPE = getRequiredEnv('TEST_GROUP_TYPE_FUNCTIONAL');
 
-  const JEST_MAX_MINUTES = process.env.JEST_MAX_MINUTES ? parseInt(process.env.JEST_MAX_MINUTES, 10) : 50;
+  const JEST_MAX_MINUTES = process.env.JEST_MAX_MINUTES ? parseFloat(process.env.JEST_MAX_MINUTES) : 50;
   if (Number.isNaN(JEST_MAX_MINUTES)) {
     throw new Error(`invalid JEST_MAX_MINUTES: ${process.env.JEST_MAX_MINUTES}`);
   }
 
   const FUNCTIONAL_MAX_MINUTES = process.env.FUNCTIONAL_MAX_MINUTES
-    ? parseInt(process.env.FUNCTIONAL_MAX_MINUTES, 10)
+    ? parseFloat(process.env.FUNCTIONAL_MAX_MINUTES)
     : 37;
   if (Number.isNaN(FUNCTIONAL_MAX_MINUTES)) {
     throw new Error(`invalid FUNCTIONAL_MAX_MINUTES: ${process.env.FUNCTIONAL_MAX_MINUTES}`);
@@ -145,7 +145,7 @@ export async function pickTestGroupRunOrder() {
     : undefined;
 
   const FUNCTIONAL_MINIMUM_ISOLATION_MIN = process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN
-    ? parseInt(process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN, 10)
+    ? parseFloat(process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN)
     : undefined;
   if (FUNCTIONAL_MINIMUM_ISOLATION_MIN !== undefined && Number.isNaN(FUNCTIONAL_MINIMUM_ISOLATION_MIN)) {
     throw new Error(
