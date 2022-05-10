@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.pickTestGroupRunOrder = void 0;
 const Fs = require("fs");
 const globby = require("globby");
+const minimatch = require("minimatch");
 const js_yaml_1 = require("js-yaml");
 const buildkite_1 = require("../buildkite");
 const client_1 = require("./client");
@@ -66,7 +67,7 @@ function getTrackedBranch() {
 function isObj(x) {
     return typeof x === 'object' && x !== null;
 }
-function getEnabledFtrConfigs() {
+function getEnabledFtrConfigs(patterns) {
     try {
         const configs = js_yaml_1.load(Fs.readFileSync('.buildkite/ftr_configs.yml', 'utf8'));
         if (!isObj(configs)) {
@@ -79,7 +80,10 @@ function getEnabledFtrConfigs() {
             !configs.enabled.every((p) => typeof p === 'string')) {
             throw new Error('expected "enabled" value to be an array of strings');
         }
-        return configs.enabled;
+        if (!patterns) {
+            return configs.enabled;
+        }
+        return configs.enabled.filter((path) => patterns.some((pattern) => minimatch(path, pattern)));
     }
     catch (_) {
         const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
@@ -103,8 +107,13 @@ async function pickTestGroupRunOrder() {
     if (Number.isNaN(FUNCTIONAL_MAX_MINUTES)) {
         throw new Error(`invalid FUNCTIONAL_MAX_MINUTES: ${process.env.FUNCTIONAL_MAX_MINUTES}`);
     }
-    const TYPE_FILTERS = process.env.LIMIT_CONFIG_TYPE
+    const LIMIT_CONFIG_TYPE = process.env.LIMIT_CONFIG_TYPE
         ? process.env.LIMIT_CONFIG_TYPE.split(',')
+            .map((t) => t.trim())
+            .filter(Boolean)
+        : ['unit', 'integration', 'functional'];
+    const FTR_CONFIG_PATTERNS = process.env.FTR_CONFIG_PATTERNS
+        ? process.env.FTR_CONFIG_PATTERNS.split(',')
             .map((t) => t.trim())
             .filter(Boolean)
         : undefined;
@@ -119,14 +128,16 @@ async function pickTestGroupRunOrder() {
             .map((t) => t.trim())
             .filter(Boolean)
         : ['build'];
-    const ftrConfigs = !TYPE_FILTERS || TYPE_FILTERS.includes('functional') ? getEnabledFtrConfigs() : [];
-    const jestUnitConfigs = !TYPE_FILTERS || TYPE_FILTERS.includes('unit')
+    const ftrConfigs = LIMIT_CONFIG_TYPE.includes('functional')
+        ? getEnabledFtrConfigs(FTR_CONFIG_PATTERNS)
+        : [];
+    const jestUnitConfigs = LIMIT_CONFIG_TYPE.includes('unit')
         ? globby.sync(['**/jest.config.js', '!**/__fixtures__/**'], {
             cwd: process.cwd(),
             absolute: false,
         })
         : [];
-    const jestIntegrationConfigs = !TYPE_FILTERS || TYPE_FILTERS.includes('integration')
+    const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
         ? globby.sync(['**/jest.integration.config.js', '!**/__fixtures__/**'], {
             cwd: process.cwd(),
             absolute: false,
