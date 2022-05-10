@@ -129,14 +129,31 @@ async function pickTestGroupRunOrder() {
     if (!ftrConfigs.length && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
         throw new Error('unable to find any unit, integration, or FTR configs');
     }
+    const trackedBranch = getTrackedBranch();
+    const ownBranch = process.env.BUILDKITE_BRANCH;
+    const pipelineSlug = process.env.BUILDKITE_PIPELINE_SLUG;
+    const prNumber = process.env.GITHUB_PR_NUMBER;
     const { sources, types } = await ciStats.pickTestGroupRunOrder({
         sources: [
             // try to get times from a recent successful job on this PR
-            ...(process.env.GITHUB_PR_NUMBER
+            ...(prNumber
                 ? [
                     {
-                        prId: process.env.GITHUB_PR_NUMBER,
+                        prId: prNumber,
                         jobName: 'kibana-pull-request',
+                    },
+                ]
+                : []),
+            // if we are running on a external job, like kibana-code-coverage-main, try finding times that are specific to that job
+            ...(!prNumber && pipelineSlug !== 'kibana-on-merge'
+                ? [
+                    {
+                        branch: ownBranch,
+                        jobName: pipelineSlug,
+                    },
+                    {
+                        branch: trackedBranch,
+                        jobName: pipelineSlug,
                     },
                 ]
                 : []),
@@ -151,7 +168,7 @@ async function pickTestGroupRunOrder() {
                 : []),
             // fallback to the latest times from the tracked branch
             {
-                branch: getTrackedBranch(),
+                branch: trackedBranch,
                 jobName: 'kibana-on-merge',
             },
         ],
