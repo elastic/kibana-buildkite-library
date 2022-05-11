@@ -153,6 +153,13 @@ export async function pickTestGroupRunOrder() {
     );
   }
 
+  const FTR_CONFIGS_RETRY_COUNT = process.env.FTR_CONFIGS_RETRY_COUNT
+    ? parseInt(process.env.FTR_CONFIGS_RETRY_COUNT, 10)
+    : 1;
+  if (Number.isNaN(FTR_CONFIGS_RETRY_COUNT)) {
+    throw new Error(`invalid FTR_CONFIGS_RETRY_COUNT: ${process.env.FTR_CONFIGS_RETRY_COUNT}`);
+  }
+
   const FTR_CONFIGS_DEPS =
     process.env.FTR_CONFIGS_DEPS !== undefined
       ? process.env.FTR_CONFIGS_DEPS.split(',')
@@ -330,7 +337,9 @@ export async function pickTestGroupRunOrder() {
               retry: {
                 automatic: [
                   { exit_status: '-1', limit: 3 },
-                  { exit_status: '*', limit: 1 },
+                  ...(FTR_CONFIGS_RETRY_COUNT > 0
+                    ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
+                    : []),
                 ],
               },
             }
@@ -353,7 +362,9 @@ export async function pickTestGroupRunOrder() {
                     retry: {
                       automatic: [
                         { exit_status: '-1', limit: 3 },
-                        { exit_status: '*', limit: 1 },
+                        ...(FTR_CONFIGS_RETRY_COUNT > 0
+                          ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
+                          : []),
                       ],
                     },
                   }),
