@@ -77,7 +77,8 @@ function getTrackedBranch(): string {
     throw new Error('missing `branch` field from package.json file');
   }
 
-  return branch;
+  // Temporary workaround until we fix ci-stats issue
+  return branch === '8.3' ? 'main' : branch;
 }
 
 function isObj(x: unknown): x is Record<string, unknown> {

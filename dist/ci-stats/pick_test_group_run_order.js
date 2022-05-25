@@ -62,7 +62,8 @@ function getTrackedBranch() {
     if (typeof branch !== 'string') {
         throw new Error('missing `branch` field from package.json file');
     }
-    return branch;
+    // Temporary workaround until we fix ci-stats issue
+    return branch === '8.3' ? 'main' : branch;
 }
 function isObj(x) {
     return typeof x === 'object' && x !== null;
