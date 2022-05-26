@@ -44,4 +44,3 @@ exports.doAnyChangesMatch = async (requiredPaths, changes = null) => {
     const anyFilesMatchRequired = requiredPaths.some((path) => prChanges.some((change) => { var _a; return change.filename.match(path) || ((_a = change.previous_filename) === null || _a === void 0 ? void 0 : _a.match(path)); }));
     return anyFilesMatchRequired;
 };
-//# sourceMappingURL=github.js.map

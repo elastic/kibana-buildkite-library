@@ -111,4 +111,3 @@ class CiStatsClient {
     }
 }
 exports.CiStatsClient = CiStatsClient;
-//# sourceMappingURL=client.js.map

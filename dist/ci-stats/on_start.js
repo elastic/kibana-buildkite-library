@@ -10,4 +10,3 @@ async function onStart() {
     await ciStats.addGitInfo(build.id);
 }
 exports.onStart = onStart;
-//# sourceMappingURL=on_start.js.map

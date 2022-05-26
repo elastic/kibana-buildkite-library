@@ -11,4 +11,3 @@ async function onMetricsViable() {
     await ciStats.markBuildAsValidBaseline(process.env.CI_STATS_BUILD_ID);
 }
 exports.onMetricsViable = onMetricsViable;
-//# sourceMappingURL=on_metrics_viable.js.map

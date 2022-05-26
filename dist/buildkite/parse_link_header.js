@@ -15,4 +15,3 @@ function parseLinkHeader(header) {
     return parsed;
 }
 exports.default = parseLinkHeader;
-//# sourceMappingURL=parse_link_header.js.map

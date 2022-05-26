@@ -99,4 +99,3 @@ exports.annotateTestFailures = async () => {
         buildkite.setMetadata('slack:test_failures:body', exports.getSlackMessage(failures, failureHtmlArtifacts));
     }
 };
-//# sourceMappingURL=annotate.js.map

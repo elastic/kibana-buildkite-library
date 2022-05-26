@@ -155,4 +155,3 @@ class BuildkiteClient {
     }
 }
 exports.BuildkiteClient = BuildkiteClient;
-//# sourceMappingURL=client.js.map
