@@ -62,8 +62,7 @@ function getTrackedBranch() {
     if (typeof branch !== 'string') {
         throw new Error('missing `branch` field from package.json file');
     }
-    // Temporary workaround until we fix ci-stats issue
-    return branch === '8.3' ? 'main' : branch;
+    return branch;
 }
 function isObj(x) {
     return typeof x === 'object' && x !== null;
@@ -193,6 +192,11 @@ async function pickTestGroupRunOrder() {
             // fallback to the latest times from the tracked branch
             {
                 branch: trackedBranch,
+                jobName: 'kibana-on-merge',
+            },
+            // finally fallback to the latest times from the main branch in case this branch is brand new
+            {
+                branch: 'main',
                 jobName: 'kibana-on-merge',
             },
         ],
