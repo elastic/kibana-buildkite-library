@@ -48,9 +48,21 @@ exports.getPrComment = (failures, failureHtmlArtifacts) => {
             .join('\n'));
 };
 exports.getSlackMessage = (failures, failureHtmlArtifacts) => {
-    console.log(`\n### Failures count: \n\t${failures.length}`);
-    console.log(`\n### FailureHtmlArtifacts count: \n\t${failureHtmlArtifacts.length}`);
-    return `*Test Failures*\n` + `### TREZ FAKE SLACK MESSAGE`;
+    return (`*Test Failures*\n` +
+        failures
+            .map((failure) => {
+            const lookup = failure.jobId + failure.hash;
+            const jobUrl = `${failure.url}#${failure.jobId}`;
+            const artifactUrl = lookup in failureHtmlArtifacts
+                ? `${failure.url.replace('https://buildkite.com/elastic', 'https://buildkite.com/organizations/elastic/pipelines')}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[lookup].id}`
+                : '';
+            const logsLink = artifactUrl ? ` <${artifactUrl}|[logs]>` : '';
+            const failuresCount = failure.failureCount && failure.githubIssue
+                ? ` <${failure.githubIssue}|[${failure.failureCount} failure${failure.failureCount > 1 ? 's' : ''}]>`
+                : '';
+            return `<${jobUrl}|[job]>${logsLink}${failuresCount} ${failure.jobName} / ${failure.name}`;
+        })
+            .join('\n'));
 };
 exports.annotateTestFailures = async () => {
     const exec = (cmd) => child_process_1.execSync(cmd, { stdio: 'inherit' });
