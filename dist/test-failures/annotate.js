@@ -48,8 +48,14 @@ exports.getPrComment = (failures, failureHtmlArtifacts) => {
             .join('\n'));
 };
 exports.getSlackMessage = (failures, failureHtmlArtifacts) => {
+    console.log('\n### Peek into the test failures while "getting" the slack msg.');
+    console.log(`\n### failures.length: \n\t${failures.length}`);
     return (`*Test Failures*\n` +
         failures
+            .map((x) => {
+            console.log(`\n### x: \n${JSON.stringify(x, null, 2)}`);
+            return x;
+        })
             .map((failure) => {
             const lookup = failure.jobId + failure.hash;
             const jobUrl = `${failure.url}#${failure.jobId}`;
