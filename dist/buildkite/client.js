@@ -112,6 +112,11 @@ class BuildkiteClient {
             }
             return this.getArtifacts(process.env.BUILDKITE_PIPELINE_SLUG, process.env.BUILDKITE_BUILD_NUMBER);
         };
+        // https://buildkite.com/docs/apis/rest-api/builds#create-a-build
+        this.triggerBuild = async (pipelineSlug, options) => {
+            const url = `v2/organizations/elastic/pipelines/${pipelineSlug}/builds`;
+            return (await this.http.post(url, options)).data;
+        };
         this.setMetadata = (key, value) => {
             child_process_1.execSync(`buildkite-agent meta-data set '${key}'`, {
                 input: value,

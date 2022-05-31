@@ -43,6 +43,22 @@ export type BuildkiteStep = {
   env?: { [key: string]: string };
 };
 
+export type BuildkiteTriggerBuildParams = {
+  commit: string;
+  branch: string;
+  env?: Record<string, string>;
+  author?: {
+    name: string;
+    email: string;
+  };
+  ignore_pipeline_branch_filters?: boolean;
+  message?: string;
+  meta_data?: Record<string, string>;
+  pull_request_base_branch?: string;
+  pull_request_id?: string | number;
+  pull_request_repository?: string;
+};
+
 export class BuildkiteClient {
   http: AxiosInstance;
 
@@ -194,6 +210,13 @@ export class BuildkiteClient {
     }
 
     return this.getArtifacts(process.env.BUILDKITE_PIPELINE_SLUG, process.env.BUILDKITE_BUILD_NUMBER);
+  };
+
+  // https://buildkite.com/docs/apis/rest-api/builds#create-a-build
+  triggerBuild = async (pipelineSlug: string, options: BuildkiteTriggerBuildParams): Promise<Build> => {
+    const url = `v2/organizations/elastic/pipelines/${pipelineSlug}/builds`;
+
+    return (await this.http.post(url, options)).data;
   };
 
   setMetadata = (key: string, value: string) => {
