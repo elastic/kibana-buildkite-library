@@ -121,24 +121,15 @@ export class BuildkiteClient {
 
     let success: boolean;
 
-    // Skipped jobs are "broken" via the API, but they're not really failures
-    if (job.type === 'script' && job.state === 'broken' && job.exit_status === null) {
-      success = true;
-    } else {
-      // "Manual" steps are for input, when they are skipped, they have state: broken in the API
-      // So let's always mark them as successful, they can't really fail
-      success =
-        job.type === 'manual' ||
-        ![
-          'failed',
-          'timed_out',
-          'timing_out',
-          'broken',
-          'waiting_failed',
-          'unblocked_failed',
-          'blocked_failed',
-        ].includes(job.state);
-    }
+    // "Manual" steps are for input, when they are skipped, they have state: broken in the API
+    // So let's always mark them as successful, they can't really fail
+    // `broken` used to be in this list, but has been removed, it's essentially another type of skip status
+    // https://buildkite.com/docs/pipelines/defining-steps#job-states - See "Differentiating between broken, skipped and canceled states:"
+    success =
+      job.type === 'manual' ||
+      !['failed', 'timed_out', 'timing_out', 'waiting_failed', 'unblocked_failed', 'blocked_failed'].includes(
+        job.state,
+      );
 
     return {
       success,
