@@ -17,6 +17,7 @@ import { Job, JobState } from './types/job';
 export type BuildkiteClientConfig = {
   baseUrl?: string;
   token?: string;
+  org?: string;
 };
 
 export type BuildkiteGroup = {
@@ -61,11 +62,14 @@ export type BuildkiteTriggerBuildParams = {
 
 export class BuildkiteClient {
   http: AxiosInstance;
+  org: string;
 
   constructor(config: BuildkiteClientConfig = {}) {
     const BUILDKITE_BASE_URL =
       config.baseUrl ?? process.env.BUILDKITE_BASE_URL ?? 'https://api.buildkite.com';
     const BUILDKITE_TOKEN = config.token ?? process.env.BUILDKITE_TOKEN;
+
+    this.org = config.org ?? process.env.BUILDKITE_ORG ?? 'elastic';
 
     // const BUILDKITE_AGENT_BASE_URL =
     //   process.env.BUILDKITE_AGENT_BASE_URL || 'https://agent.buildkite.com/v3';
@@ -92,7 +96,7 @@ export class BuildkiteClient {
     includeRetriedJobs = false,
   ): Promise<Build> => {
     // TODO properly assemble URL
-    const link = `v2/organizations/elastic/pipelines/${pipelineSlug}/builds/${buildNumber}?include_retried_jobs=${includeRetriedJobs.toString()}`;
+    const link = `v2/organizations/${this.org}/pipelines/${pipelineSlug}/builds/${buildNumber}?include_retried_jobs=${includeRetriedJobs.toString()}`;
     const resp = await this.http.get(link);
     return resp.data as Build;
   };
@@ -170,7 +174,7 @@ export class BuildkiteClient {
   };
 
   getArtifacts = async (pipelineSlug: string, buildNumber: string | number): Promise<Artifact[]> => {
-    let link = `v2/organizations/elastic/pipelines/${pipelineSlug}/builds/${buildNumber}/artifacts?per_page=100`;
+    let link = `v2/organizations/${this.org}/pipelines/${pipelineSlug}/builds/${buildNumber}/artifacts?per_page=100`;
     const artifacts = [];
 
     // Don't get stuck in an infinite loop or follow more than 50 pages
@@ -205,7 +209,7 @@ export class BuildkiteClient {
 
   // https://buildkite.com/docs/apis/rest-api/builds#create-a-build
   triggerBuild = async (pipelineSlug: string, options: BuildkiteTriggerBuildParams): Promise<Build> => {
-    const url = `v2/organizations/elastic/pipelines/${pipelineSlug}/builds`;
+    const url = `v2/organizations/${this.org}/pipelines/${pipelineSlug}/builds`;
 
     return (await this.http.post(url, options)).data;
   };
