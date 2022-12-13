@@ -14,10 +14,10 @@ const js_yaml_1 = require("js-yaml");
 const parse_link_header_1 = require("./parse_link_header");
 class BuildkiteClient {
     constructor(config = {}) {
-        var _a, _b, _c;
+        var _a, _b, _c, _d, _e;
         this.getBuild = async (pipelineSlug, buildNumber, includeRetriedJobs = false) => {
             // TODO properly assemble URL
-            const link = `v2/organizations/elastic/pipelines/${pipelineSlug}/builds/${buildNumber}?include_retried_jobs=${includeRetriedJobs.toString()}`;
+            const link = `v2/organizations/${this.org}/pipelines/${pipelineSlug}/builds/${buildNumber}?include_retried_jobs=${includeRetriedJobs.toString()}`;
             const resp = await this.http.get(link);
             return resp.data;
         };
@@ -75,7 +75,7 @@ class BuildkiteClient {
             return this.getBuildStatus(await this.getCurrentBuild(includeRetriedJobs));
         };
         this.getArtifacts = async (pipelineSlug, buildNumber) => {
-            let link = `v2/organizations/elastic/pipelines/${pipelineSlug}/builds/${buildNumber}/artifacts?per_page=100`;
+            let link = `v2/organizations/${this.org}/pipelines/${pipelineSlug}/builds/${buildNumber}/artifacts?per_page=100`;
             const artifacts = [];
             // Don't get stuck in an infinite loop or follow more than 50 pages
             for (let i = 0; i < 50; i++) {
@@ -102,7 +102,7 @@ class BuildkiteClient {
         };
         // https://buildkite.com/docs/apis/rest-api/builds#create-a-build
         this.triggerBuild = async (pipelineSlug, options) => {
-            const url = `v2/organizations/elastic/pipelines/${pipelineSlug}/builds`;
+            const url = `v2/organizations/${this.org}/pipelines/${pipelineSlug}/builds`;
             return (await this.http.post(url, options)).data;
         };
         this.setMetadata = (key, value) => {
@@ -130,6 +130,7 @@ class BuildkiteClient {
         };
         const BUILDKITE_BASE_URL = (_b = (_a = config.baseUrl) !== null && _a !== void 0 ? _a : process.env.BUILDKITE_BASE_URL) !== null && _b !== void 0 ? _b : 'https://api.buildkite.com';
         const BUILDKITE_TOKEN = (_c = config.token) !== null && _c !== void 0 ? _c : process.env.BUILDKITE_TOKEN;
+        this.org = (_e = (_d = config.org) !== null && _d !== void 0 ? _d : process.env.BUILDKITE_ORG) !== null && _e !== void 0 ? _e : 'elastic';
         // const BUILDKITE_AGENT_BASE_URL =
         //   process.env.BUILDKITE_AGENT_BASE_URL || 'https://agent.buildkite.com/v3';
         // const BUILDKITE_AGENT_TOKEN = process.env.BUILDKITE_AGENT_TOKEN;
