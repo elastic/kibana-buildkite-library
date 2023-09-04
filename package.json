@@ -1,8 +1,10 @@
 {
   "name": "kibana-buildkite-library",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Buildkite Utilities",
   "main": "./dist",
+  "types": "./types",
+  "files": ["./dist", "./types"],
   "scripts": {
     "prepare": "husky install",
     "test": "mocha",
