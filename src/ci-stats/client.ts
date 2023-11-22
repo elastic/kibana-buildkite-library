@@ -1,4 +1,4 @@
-import axios, { Method, AxiosRequestConfig } from 'axios';
+import axios, { Method, AxiosRequestConfig, AxiosError } from 'axios';
 
 export type CiStatsClientConfig = {
   baseUrl?: string;
@@ -186,7 +186,7 @@ export class CiStatsClient {
           headers: this.defaultHeaders,
         });
       } catch (error) {
-        console.error('CI Stats request error:', error);
+        console.error('CI Stats request error:', (error as any)?.response?.data?.message);
 
         if (attempt < maxAttempts) {
           const sec = attempt * 3;
@@ -195,7 +195,7 @@ export class CiStatsClient {
           continue;
         }
 
-        throw error;
+        throw new Error('Failed to connect to CI Stats.');
       }
     }
   }
