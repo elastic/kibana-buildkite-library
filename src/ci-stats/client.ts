@@ -1,4 +1,4 @@
-import axios, { Method, AxiosRequestConfig, AxiosError } from 'axios';
+import axios, { Method, AxiosRequestConfig } from 'axios';
 
 export type CiStatsClientConfig = {
   baseUrl?: string;

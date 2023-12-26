@@ -9,8 +9,6 @@
     "removeComments": false,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "declaration": true,
-    "declarationDir": "./types",
     "lib": ["es2020"]
   },
   "exclude": ["**/*.test.ts", "**/vm-filesystem/**", "**/dist", "**/types"]
