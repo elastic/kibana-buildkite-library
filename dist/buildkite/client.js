@@ -86,7 +86,7 @@ class BuildkiteClient {
                 link = '';
                 artifacts.push(await resp.data);
                 if (resp.headers.link) {
-                    const result = parse_link_header_1.default(resp.headers.link);
+                    const result = (0, parse_link_header_1.default)(resp.headers.link);
                     if (result === null || result === void 0 ? void 0 : result.next) {
                         link = result.next;
                     }
@@ -106,25 +106,25 @@ class BuildkiteClient {
             return (await this.http.post(url, options)).data;
         };
         this.setMetadata = (key, value) => {
-            child_process_1.execSync(`buildkite-agent meta-data set '${key}'`, {
+            (0, child_process_1.execSync)(`buildkite-agent meta-data set '${key}'`, {
                 input: value,
                 stdio: ['pipe', 'inherit', 'inherit'],
             });
         };
         this.setAnnotation = (context, style, value) => {
-            child_process_1.execSync(`buildkite-agent annotate --context '${context}' --style '${style}'`, {
+            (0, child_process_1.execSync)(`buildkite-agent annotate --context '${context}' --style '${style}'`, {
                 input: value,
                 stdio: ['pipe', 'inherit', 'inherit'],
             });
         };
         this.uploadArtifacts = (pattern) => {
-            child_process_1.execSync(`buildkite-agent artifact upload '${pattern}'`, {
+            (0, child_process_1.execSync)(`buildkite-agent artifact upload '${pattern}'`, {
                 stdio: ['ignore', 'inherit', 'inherit'],
             });
         };
         this.uploadSteps = (steps) => {
-            child_process_1.execSync(`buildkite-agent pipeline upload`, {
-                input: js_yaml_1.dump({ steps }),
+            (0, child_process_1.execSync)(`buildkite-agent pipeline upload`, {
+                input: (0, js_yaml_1.dump)({ steps }),
                 stdio: ['pipe', 'inherit', 'inherit'],
             });
         };

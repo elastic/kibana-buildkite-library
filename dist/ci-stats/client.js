@@ -83,7 +83,7 @@ class CiStatsClient {
         };
     }
     async request({ method, path, params, body, maxAttempts = 3 }) {
-        var _a, _b, _c;
+        var _a, _b;
         let attempt = 0;
         // eslint-disable-next-line no-constant-condition
         while (true) {
@@ -99,7 +99,7 @@ class CiStatsClient {
                 });
             }
             catch (error) {
-                console.error('CI Stats request error:', (_c = (_b = (_a = error) === null || _a === void 0 ? void 0 : _a.response) === null || _b === void 0 ? void 0 : _b.data) === null || _c === void 0 ? void 0 : _c.message);
+                console.error('CI Stats request error:', (_b = (_a = error === null || error === void 0 ? void 0 : error.response) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.message);
                 if (attempt < maxAttempts) {
                     const sec = attempt * 3;
                     console.log('waiting', sec, 'seconds before retrying');

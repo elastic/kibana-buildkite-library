@@ -7,18 +7,18 @@ const path_1 = require("path");
 const __1 = require("..");
 const buildkite = new __1.BuildkiteClient();
 const recursiveReadDir = (dirPath, allFiles = []) => {
-    const files = fs_1.readdirSync(dirPath);
+    const files = (0, fs_1.readdirSync)(dirPath);
     for (const file of files) {
-        if (fs_1.statSync(path_1.join(dirPath, file)).isDirectory()) {
-            allFiles = recursiveReadDir(path_1.join(dirPath, file), allFiles);
+        if ((0, fs_1.statSync)((0, path_1.join)(dirPath, file)).isDirectory()) {
+            allFiles = recursiveReadDir((0, path_1.join)(dirPath, file), allFiles);
         }
         else {
-            allFiles.push(path_1.join(dirPath, file));
+            allFiles.push((0, path_1.join)(dirPath, file));
         }
     }
     return allFiles;
 };
-exports.getAnnotation = (failures, failureHtmlArtifacts) => {
+const getAnnotation = (failures, failureHtmlArtifacts) => {
     return (`**Test Failures**<br />\n` +
         failures
             .map((failure) => {
@@ -32,7 +32,8 @@ exports.getAnnotation = (failures, failureHtmlArtifacts) => {
         })
             .join('<br />\n'));
 };
-exports.getPrComment = (failures, failureHtmlArtifacts) => {
+exports.getAnnotation = getAnnotation;
+const getPrComment = (failures, failureHtmlArtifacts) => {
     return (`### Test Failures\n` +
         failures
             .map((failure) => {
@@ -47,7 +48,8 @@ exports.getPrComment = (failures, failureHtmlArtifacts) => {
         })
             .join('\n'));
 };
-exports.getSlackMessage = (failures, failureHtmlArtifacts) => {
+exports.getPrComment = getPrComment;
+const getSlackMessage = (failures, failureHtmlArtifacts) => {
     return (`*Test Failures*\n` +
         failures
             .map((failure) => {
@@ -64,10 +66,11 @@ exports.getSlackMessage = (failures, failureHtmlArtifacts) => {
         })
             .join('\n'));
 };
-exports.annotateTestFailures = async () => {
-    const exec = (cmd) => child_process_1.execSync(cmd, { stdio: 'inherit' });
+exports.getSlackMessage = getSlackMessage;
+const annotateTestFailures = async () => {
+    const exec = (cmd) => (0, child_process_1.execSync)(cmd, { stdio: 'inherit' });
     const failureDir = 'target/process-test-failures';
-    fs_1.mkdirSync(failureDir, { recursive: true });
+    (0, fs_1.mkdirSync)(failureDir, { recursive: true });
     const artifacts = await buildkite.getArtifactsForCurrentBuild();
     const failureHtmlArtifacts = {};
     for (const artifact of artifacts) {
@@ -81,7 +84,7 @@ exports.annotateTestFailures = async () => {
         .map((file) => {
         try {
             if (file.endsWith('.json')) {
-                return JSON.parse(fs_1.readFileSync(file).toString());
+                return JSON.parse((0, fs_1.readFileSync)(file).toString());
             }
         }
         catch (ex) {
@@ -91,11 +94,12 @@ exports.annotateTestFailures = async () => {
     })
         .filter((f) => f)
         .sort((a, b) => a.name.localeCompare(b.name));
-    buildkite.setAnnotation('test_failures', 'error', exports.getAnnotation(failures, failureHtmlArtifacts));
+    buildkite.setAnnotation('test_failures', 'error', (0, exports.getAnnotation)(failures, failureHtmlArtifacts));
     if (process.env.PR_COMMENTS_ENABLED === 'true') {
-        buildkite.setMetadata('pr_comment:test_failures:body', exports.getPrComment(failures, failureHtmlArtifacts));
+        buildkite.setMetadata('pr_comment:test_failures:body', (0, exports.getPrComment)(failures, failureHtmlArtifacts));
     }
     if (process.env.SLACK_NOTIFICATIONS_ENABLED === 'true') {
-        buildkite.setMetadata('slack:test_failures:body', exports.getSlackMessage(failures, failureHtmlArtifacts));
+        buildkite.setMetadata('slack:test_failures:body', (0, exports.getSlackMessage)(failures, failureHtmlArtifacts));
     }
 };
+exports.annotateTestFailures = annotateTestFailures;

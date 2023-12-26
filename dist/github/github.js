@@ -6,7 +6,7 @@ const github = new rest_1.Octokit({
     auth: process.env.GITHUB_TOKEN,
 });
 let prChangesCache = null;
-exports.getPrChanges = async (owner = process.env.GITHUB_PR_BASE_OWNER, repo = process.env.GITHUB_PR_BASE_REPO, prNumber = process.env.GITHUB_PR_NUMBER) => {
+const getPrChanges = async (owner = process.env.GITHUB_PR_BASE_OWNER, repo = process.env.GITHUB_PR_BASE_REPO, prNumber = process.env.GITHUB_PR_NUMBER) => {
     if (!owner || !repo || !prNumber) {
         throw "Couldn't retrieve Github PR info from environment variables in order to retrieve PR changes";
     }
@@ -18,12 +18,14 @@ exports.getPrChanges = async (owner = process.env.GITHUB_PR_BASE_OWNER, repo = p
     });
     return files;
 };
-exports.getPrChangesCached = async () => {
-    prChangesCache = prChangesCache || (await exports.getPrChanges());
+exports.getPrChanges = getPrChanges;
+const getPrChangesCached = async () => {
+    prChangesCache = prChangesCache || (await (0, exports.getPrChanges)());
     return prChangesCache;
 };
-exports.areChangesSkippable = async (skippablePaths, requiredPaths = [], changes = null) => {
-    const prChanges = changes || (await exports.getPrChangesCached());
+exports.getPrChangesCached = getPrChangesCached;
+const areChangesSkippable = async (skippablePaths, requiredPaths = [], changes = null) => {
+    const prChanges = changes || (await (0, exports.getPrChangesCached)());
     if (prChanges.length >= 3000) {
         return false;
     }
@@ -36,11 +38,13 @@ exports.areChangesSkippable = async (skippablePaths, requiredPaths = [], changes
     const someFilesNotSkippable = prChanges.some((change) => !skippablePaths.some((path) => change.filename.match(path) && (!change.previous_filename || change.previous_filename.match(path))));
     return !someFilesNotSkippable;
 };
-exports.doAnyChangesMatch = async (requiredPaths, changes = null) => {
-    const prChanges = changes || (await exports.getPrChangesCached());
+exports.areChangesSkippable = areChangesSkippable;
+const doAnyChangesMatch = async (requiredPaths, changes = null) => {
+    const prChanges = changes || (await (0, exports.getPrChangesCached)());
     if (prChanges.length >= 3000) {
         return true;
     }
     const anyFilesMatchRequired = requiredPaths.some((path) => prChanges.some((change) => { var _a; return change.filename.match(path) || ((_a = change.previous_filename) === null || _a === void 0 ? void 0 : _a.match(path)); }));
     return anyFilesMatchRequired;
 };
+exports.doAnyChangesMatch = doAnyChangesMatch;
