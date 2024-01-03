@@ -96,7 +96,9 @@ export class BuildkiteClient {
     includeRetriedJobs = false,
   ): Promise<Build> => {
     // TODO properly assemble URL
-    const link = `v2/organizations/${this.org}/pipelines/${pipelineSlug}/builds/${buildNumber}?include_retried_jobs=${includeRetriedJobs.toString()}`;
+    const link = `v2/organizations/${
+      this.org
+    }/pipelines/${pipelineSlug}/builds/${buildNumber}?include_retried_jobs=${includeRetriedJobs.toString()}`;
     const resp = await this.http.get(link);
     return resp.data as Build;
   };

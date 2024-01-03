@@ -6,7 +6,7 @@ const client_1 = require("./client");
 const ciStats = new client_1.CiStatsClient();
 async function onStart() {
     const build = await ciStats.createBuild();
-    child_process_1.execSync(`buildkite-agent meta-data set ci_stats_build_id "${build.id}"`);
+    (0, child_process_1.execSync)(`buildkite-agent meta-data set ci_stats_build_id "${build.id}"`);
     await ciStats.addGitInfo(build.id);
 }
 exports.onStart = onStart;

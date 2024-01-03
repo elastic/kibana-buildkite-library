@@ -69,7 +69,7 @@ function isObj(x) {
 }
 function getEnabledFtrConfigs(patterns) {
     try {
-        const configs = js_yaml_1.load(Fs.readFileSync('.buildkite/ftr_configs.yml', 'utf8'));
+        const configs = (0, js_yaml_1.load)(Fs.readFileSync('.buildkite/ftr_configs.yml', 'utf8'));
         if (!isObj(configs)) {
             throw new Error('expected yaml file to parse to an object');
         }

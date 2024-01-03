@@ -19,11 +19,12 @@
 	"ignorePatterns": [
 		"node_modules",
 		"vm-filesystem",
-		"*.js"
+		"*.js",
+		"**/types"
 	],
 	"rules": {
 		"no-unused-vars": "off",
-		"@typescript-eslint/no-unused-vars-experimental": "error",
+		"@typescript-eslint/no-unused-vars": "error",
 		"@typescript-eslint/no-floating-promises": "error",
 		"@typescript-eslint/no-misused-promises": [
 			"error",
