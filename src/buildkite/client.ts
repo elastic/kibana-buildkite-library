@@ -29,9 +29,18 @@ export type BuildkiteStep = {
   command: string;
   label: string;
   parallelism?: number;
-  agents: {
-    queue: string;
-  };
+  agents:
+    | {
+        queue: string;
+      }
+    | {
+        provider?: string;
+        image?: string;
+        imageProject?: string;
+        machineType?: string;
+        minCpuPlatform?: string;
+        preemptible?: boolean;
+      };
   timeout_in_minutes?: number;
   key?: string;
   depends_on?: string | string[];
