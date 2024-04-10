@@ -17,6 +17,13 @@ export declare type BuildkiteStep = {
     parallelism?: number;
     agents: {
         queue: string;
+    } | {
+        provider?: string;
+        image?: string;
+        imageProject?: string;
+        machineType?: string;
+        minCpuPlatform?: string;
+        preemptible?: boolean;
     };
     timeout_in_minutes?: number;
     key?: string;
