@@ -78,3 +78,7 @@ export const doAnyChangesMatch = async (
 
   return anyFilesMatchRequired;
 };
+
+export function getGithubClient() {
+  return github;
+}
