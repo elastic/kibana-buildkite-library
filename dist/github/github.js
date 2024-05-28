@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.doAnyChangesMatch = exports.areChangesSkippable = exports.getPrChangesCached = exports.getPrChanges = void 0;
+exports.getGithubClient = exports.doAnyChangesMatch = exports.areChangesSkippable = exports.getPrChangesCached = exports.getPrChanges = void 0;
 const rest_1 = require("@octokit/rest");
 const github = new rest_1.Octokit({
     auth: process.env.GITHUB_TOKEN,
@@ -48,3 +48,7 @@ const doAnyChangesMatch = async (requiredPaths, changes = null) => {
     return anyFilesMatchRequired;
 };
 exports.doAnyChangesMatch = doAnyChangesMatch;
+function getGithubClient() {
+    return github;
+}
+exports.getGithubClient = getGithubClient;
