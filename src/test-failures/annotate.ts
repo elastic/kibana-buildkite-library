@@ -166,7 +166,7 @@ export const annotateTestFailures = async () => {
     buildkite.setMetadata('pr_comment:test_failures:body', getPrComment(failures, failureHtmlArtifacts));
   }
 
-  if (process.env.SLACK_NOTIFICATIONS_ENABLED === 'true') {
+  if (process.env.ELASTIC_SLACK_NOTIFICATIONS_ENABLED === 'true') {
     buildkite.setMetadata('slack:test_failures:body', getSlackMessage(failures, failureHtmlArtifacts));
   }
 };
