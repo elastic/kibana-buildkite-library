@@ -1,4 +1,4 @@
-export declare type Pipeline = {
+export type Pipeline = {
     id: string;
     url: string;
     web_url: string;
@@ -30,7 +30,7 @@ export declare type Pipeline = {
     configuration: string;
     env: Record<string, string>;
 };
-export declare type Step = {
+export type Step = {
     type: string;
     name: string;
     command: string;
