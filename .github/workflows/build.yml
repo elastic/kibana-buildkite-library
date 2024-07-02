@@ -1,0 +1,41 @@
+## Github action to run:
+# 1. Install dependencies
+# 2. Build the project
+# 3. Run tests (if any)
+# 4. If there are new files generated in `/dist` folder, then fail the build, and prompt to commit the changes.
+
+name: Build, Test & Verify dist
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Check for changes in dist folder
+        run: |
+          git diff --exit-code --name-only
+          if [ $? -ne 0 ]; then
+            echo "New files generated in /dist folder. Please commit the changes."
+            exit 1
+          fi
