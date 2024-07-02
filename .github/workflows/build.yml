@@ -34,6 +34,8 @@ jobs:
 
       - name: Check version bump # If there are changes in 'dist', was the package version bumped?
         run: |
+          git remote -v
+
           git diff --exit-code --name-only dist/
           if [ $? -ne 0 ]; then
             echo "New files generated in /dist folder. Please commit the changes."
