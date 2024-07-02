@@ -99,10 +99,10 @@ const annotateTestFailures = async () => {
         .filter((f) => f)
         .sort((a, b) => a.name.localeCompare(b.name));
     buildkite.setAnnotation('test_failures', 'error', (0, exports.getAnnotation)(failures, failureHtmlArtifacts));
-    if (process.env.PR_COMMENTS_ENABLED === 'true') {
+    if (process.env.ELASTIC_PR_COMMENTS_ENABLED === 'true') {
         buildkite.setMetadata('pr_comment:test_failures:body', (0, exports.getPrComment)(failures, failureHtmlArtifacts));
     }
-    if (process.env.SLACK_NOTIFICATIONS_ENABLED === 'true') {
+    if (process.env.ELASTIC_SLACK_NOTIFICATIONS_ENABLED === 'true') {
         buildkite.setMetadata('slack:test_failures:body', (0, exports.getSlackMessage)(failures, failureHtmlArtifacts));
     }
 };
