@@ -1,6 +1,6 @@
 import { Agent } from './agent';
-export declare type JobState = 'pending' | 'waiting' | 'waiting_failed' | 'blocked' | 'blocked_failed' | 'unblocked' | 'unblocked_failed' | 'limiting' | 'limited' | 'scheduled' | 'assigned' | 'accepted' | 'running' | 'passed' | 'failed' | 'canceling' | 'canceled' | 'timing_out' | 'timed_out' | 'skipped' | 'broken';
-export declare type Job = {
+export type JobState = 'pending' | 'waiting' | 'waiting_failed' | 'blocked' | 'blocked_failed' | 'unblocked' | 'unblocked_failed' | 'limiting' | 'limited' | 'scheduled' | 'assigned' | 'accepted' | 'running' | 'passed' | 'failed' | 'canceling' | 'canceled' | 'timing_out' | 'timed_out' | 'skipped' | 'broken';
+export type Job = {
     id: string;
     type: string;
     name: string;

@@ -1,13 +1,13 @@
 import { Job } from './job';
 import { Pipeline } from './pipeline';
-export declare type BuildState = 'running' | 'scheduled' | 'passed' | 'failed' | 'blocked' | 'canceled' | 'canceling' | 'skipped' | 'not_run' | 'finished';
-export declare type BuildStatus = {
+export type BuildState = 'running' | 'scheduled' | 'passed' | 'failed' | 'blocked' | 'canceled' | 'canceling' | 'skipped' | 'not_run' | 'finished';
+export type BuildStatus = {
     state: BuildState;
     success: boolean;
     hasRetries: boolean;
     hasNonPreemptionRetries: boolean;
 };
-export declare type Build = {
+export type Build = {
     id: string;
     url: string;
     web_url: string;

@@ -1,4 +1,4 @@
-export declare type Agent = {
+export type Agent = {
     id: string;
     url: string;
     web_url: string;

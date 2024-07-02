@@ -1,5 +1,5 @@
 import { Artifact } from '../buildkite/types/artifact';
-export declare type TestFailure = {
+export type TestFailure = {
     name: string;
     classname: string;
     time: string;

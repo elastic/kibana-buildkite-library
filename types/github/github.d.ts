@@ -27,3 +27,6 @@ export declare const getPrChangesCached: () => Promise<{
 }[]>;
 export declare const areChangesSkippable: (skippablePaths: RegExp[], requiredPaths?: RegExp[], changes?: null | RestEndpointMethodTypes['pulls']['listFiles']['response']['data']) => Promise<boolean>;
 export declare const doAnyChangesMatch: (requiredPaths: RegExp[], changes?: null | RestEndpointMethodTypes['pulls']['listFiles']['response']['data']) => Promise<boolean>;
+export declare function getGithubClient(): import("@octokit/core").Octokit & {
+    paginate: import("@octokit/plugin-paginate-rest").PaginateInterface;
+} & import("@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types").RestEndpointMethods & import("@octokit/plugin-rest-endpoint-methods/dist-types/types").Api;
