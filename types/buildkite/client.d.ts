@@ -2,16 +2,16 @@ import { AxiosInstance } from 'axios';
 import { Artifact } from './types/artifact';
 import { Build, BuildStatus } from './types/build';
 import { Job, JobState } from './types/job';
-export declare type BuildkiteClientConfig = {
+export type BuildkiteClientConfig = {
     baseUrl?: string;
     token?: string;
     org?: string;
 };
-export declare type BuildkiteGroup = {
+export type BuildkiteGroup = {
     group: string;
     steps: BuildkiteStep[];
 };
-export declare type BuildkiteStep = {
+export type BuildkiteStep = {
     command: string;
     label: string;
     parallelism?: number;
@@ -38,7 +38,7 @@ export declare type BuildkiteStep = {
         [key: string]: string;
     };
 };
-export declare type BuildkiteTriggerBuildParams = {
+export type BuildkiteTriggerBuildParams = {
     commit: string;
     branch: string;
     env?: Record<string, string>;

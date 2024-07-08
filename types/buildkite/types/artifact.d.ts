@@ -1,4 +1,4 @@
-export declare type Artifact = {
+export type Artifact = {
     id: string;
     job_id: string;
     url: string;

@@ -1,11 +1,11 @@
-export declare type CiStatsClientConfig = {
+export type CiStatsClientConfig = {
     baseUrl?: string;
     token?: string;
 };
-export declare type CiStatsBuild = {
+export type CiStatsBuild = {
     id: string;
 };
-export declare type CiStatsPrReport = {
+export type CiStatsPrReport = {
     md: string;
     success: boolean;
 };
