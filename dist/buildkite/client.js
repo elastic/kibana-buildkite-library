@@ -49,7 +49,7 @@ class BuildkiteClient {
             };
         };
         this.getBuildStatus = (build) => {
-            var _a, _b;
+            var _a;
             let hasRetries = false;
             let hasNonPreemptionRetries = false;
             let success = build.state !== 'failed';
@@ -57,7 +57,7 @@ class BuildkiteClient {
                 if (job.retried) {
                     hasRetries = true;
                     const isPreemptionFailure = job.state === 'failed' &&
-                        ((_b = (_a = job.agent) === null || _a === void 0 ? void 0 : _a.meta_data) === null || _b === void 0 ? void 0 : _b.some((el) => ['spot=true', 'gcp:preemptible=true'].includes(el))) &&
+                        ((_a = job.agent_query_rules) === null || _a === void 0 ? void 0 : _a.includes('preemptible=true')) &&
                         job.exit_status === -1;
                     if (!isPreemptionFailure) {
                         hasNonPreemptionRetries = true;
