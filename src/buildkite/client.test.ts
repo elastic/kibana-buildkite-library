@@ -16,9 +16,7 @@ describe('BuildkiteClient', () => {
         id: 'id-1',
         retried_in_job_id: 'id-2',
         state: 'failed',
-        agent: {
-          meta_data: ['spot=true'],
-        },
+        agent_query_rules: ['preemptible=true'],
         retried: true,
         exit_status: -1,
         type: 'script',
@@ -27,9 +25,7 @@ describe('BuildkiteClient', () => {
       const retry: Job = {
         id: 'id-2',
         state: 'passed',
-        agent: {
-          meta_data: ['spot=true'],
-        },
+        agent_query_rules: ['preemptible=true'],
         type: 'script',
       } as Job;
 
@@ -50,9 +46,7 @@ describe('BuildkiteClient', () => {
         id: 'id-1',
         retried_in_job_id: 'id-2',
         state: 'failed',
-        agent: {
-          meta_data: ['spot=true'],
-        },
+        agent_query_rules: ['preemptible=true'],
         retried: true,
         exit_status: 1,
         type: 'script',
@@ -61,9 +55,7 @@ describe('BuildkiteClient', () => {
       const retry: Job = {
         id: 'id-2',
         state: 'passed',
-        agent: {
-          meta_data: ['spot=true'],
-        },
+        agent_query_rules: ['preemptible=true'],
         type: 'script',
       } as Job;
 
